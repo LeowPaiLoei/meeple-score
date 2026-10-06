@@ -58,7 +58,6 @@
     .quick { display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:8px; }
     .score-btn { min-height:var(--tap); border-radius:15px; border:1px solid rgba(0,0,0,.10); background:#fff; color:var(--ink); font-weight:900; font-size:17px; cursor:pointer; box-shadow:0 3px 8px rgba(60,40,20,.06); }
     .score-btn:active { transform:scale(.97); background:#f7f7f7; }
-    .score-btn.minus { color:#9a3131; }
     .custom-row { display:flex; gap:8px; margin-top:9px; }
     .custom-input { width:100%; min-width:0; min-height:48px; border:1px solid var(--line); border-radius:13px; background:rgba(255,255,255,.82); padding:0 12px; font-size:17px; outline:none; }
     .custom-input:focus { border-color:var(--player); box-shadow:0 0 0 3px color-mix(in srgb, var(--player) 18%, transparent); }
@@ -68,6 +67,10 @@
     .category-btn { min-height:42px; border-radius:12px; border:1px solid var(--line); background:rgba(255,255,255,.74); color:var(--ink); font-size:13px; font-weight:850; cursor:pointer; }
     .category-btn.active { background:var(--player); color:#fff; border-color:var(--player); box-shadow:0 3px 10px rgba(0,0,0,.10); }
     .category-btn:active { transform:scale(.98); }
+    .goods-picker { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:14px; }
+    .goods-choice { min-height:110px; border-radius:18px; border:1px solid var(--line); background:#fff; color:var(--ink); cursor:pointer; font-weight:900; font-size:34px; display:grid; place-items:center; align-content:center; gap:7px; box-shadow:0 4px 12px rgba(60,40,20,.06); }
+    .goods-choice span { font-size:17px; }
+    .goods-choice:active { transform:scale(.97); background:#f7f1e4; }
     .summary-grid { display:grid; gap:12px; margin-top:14px; }
     .summary-card { border:1px solid var(--line); border-radius:16px; background:#fff; padding:14px; }
     .summary-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px; }
@@ -182,6 +185,21 @@
     </div>
   </div>
 
+  <div class="overlay" id="goodsOverlay" role="dialog" aria-modal="true" aria-labelledby="goodsTitle">
+    <div class="modal" style="width:min(520px,100%)">
+      <h2 id="goodsTitle">เลือกสินค้า</h2>
+      <p class="hint">เลือกชนิดสินค้าสำหรับ <strong id="goodsPlayerName"></strong></p>
+      <div class="goods-picker">
+        <button class="goods-choice" data-goods-type="goods_chicken" type="button">🐔<span>ไก่</span></button>
+        <button class="goods-choice" data-goods-type="goods_cloth" type="button">🧵<span>ผ้า</span></button>
+        <button class="goods-choice" data-goods-type="goods_rice" type="button">🌾<span>ข้าว</span></button>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="closeGoodsBtn" type="button">ยกเลิก</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
 <script>
@@ -198,15 +216,23 @@
     { name: 'ส้ม', value: '#c66b2d' }
   ];
 
-  const categories = [
+  const baseCategories = [
     { id:'city', label:'🏰 เมือง' },
     { id:'road', label:'🛣️ ถนน' },
     { id:'monastery', label:'⛪ โบสถ์' },
-    { id:'field', label:'🌾 นอนหญ้า' },
-    { id:'goods', label:'🎁 สินค้า' }
+    { id:'field', label:'🌾 นอนหญ้า' }
   ];
 
-  const categoryLabel = id => categories.find(c => c.id === id)?.label || '🕘 ไม่ระบุ (ข้อมูลเก่า)';
+  const goodsTypes = [
+    { id:'goods_chicken', label:'🐔 ไก่', short:'ไก่' },
+    { id:'goods_cloth', label:'🧵 ผ้า', short:'ผ้า' },
+    { id:'goods_rice', label:'🌾 ข้าว', short:'ข้าว' }
+  ];
+
+  const scoringCategories = [...baseCategories, ...goodsTypes];
+  const isGoodsCategory = id => goodsTypes.some(g => g.id === id);
+  const categoryLabel = id => scoringCategories.find(c => c.id === id)?.label
+    || (id === 'goods_legacy' ? '🎁 สินค้า (ไม่ระบุชนิด)' : '🕘 ไม่ระบุ (ข้อมูลเก่า)');
 
   const defaultState = () => ({
     started: false,
@@ -225,11 +251,13 @@
   let state = loadState() || defaultState();
   state.players = (state.players || []).map(p => ({
     ...p,
-    category: p.category === 'expansion' ? 'goods' : (categories.some(cat => cat.id === p.category) ? p.category : 'city')
+    category: scoringCategories.some(cat => cat.id === p.category) ? p.category : 'city'
   }));
   state.history = (state.history || []).map(h => ({
     ...h,
-    category: h.category === 'expansion' ? 'goods' : (categories.some(cat => cat.id === h.category) ? h.category : 'legacy')
+    category: scoringCategories.some(cat => cat.id === h.category)
+      ? h.category
+      : ((h.category === 'goods' || h.category === 'expansion') ? 'goods_legacy' : 'legacy')
   }));
   let setupCount = state.playerCount || 4;
 
@@ -238,6 +266,8 @@
   const setupOverlay = el('setupOverlay');
   const historyOverlay = el('historyOverlay');
   const summaryOverlay = el('summaryOverlay');
+  const goodsOverlay = el('goodsOverlay');
+  let pendingGoodsPlayerId = null;
 
   function loadState() {
     try {
@@ -277,14 +307,13 @@
         <div class="score">${p.score}</div>
         <div class="category-label">ประเภทคะแนน</div>
         <div class="categories">
-          ${categories.map(cat => `<button class="category-btn ${(p.category || 'city') === cat.id ? 'active' : ''}" data-category="${cat.id}" data-id="${p.id}" type="button">${cat.label}</button>`).join('')}
+          ${baseCategories.map(cat => `<button class="category-btn ${(p.category || 'city') === cat.id ? 'active' : ''}" data-category="${cat.id}" data-id="${p.id}" type="button">${cat.label}</button>`).join('')}
+          <button class="category-btn ${isGoodsCategory(p.category) ? 'active' : ''}" data-goods-picker="${p.id}" type="button">
+            🎁 สินค้า${isGoodsCategory(p.category) ? ` • ${goodsTypes.find(g => g.id === p.category)?.short || ''}` : ''}
+          </button>
         </div>
         <div class="quick">
-          <button class="score-btn minus" data-delta="-1" data-id="${p.id}" type="button">−1</button>
-          <button class="score-btn" data-delta="1" data-id="${p.id}" type="button">+1</button>
-          <button class="score-btn" data-delta="2" data-id="${p.id}" type="button">+2</button>
-          <button class="score-btn" data-delta="5" data-id="${p.id}" type="button">+5</button>
-          <button class="score-btn" data-delta="10" data-id="${p.id}" type="button">+10</button>
+          ${Array.from({ length: 10 }, (_, i) => i + 1).map(n => `<button class="score-btn" data-delta="${n}" data-id="${p.id}" type="button">+${n}</button>`).join('')}
         </div>
         <div class="custom-row">
           <input class="custom-input" inputmode="numeric" pattern="-?[0-9]*" placeholder="คะแนนอื่น เช่น 12 หรือ -3" aria-label="คะแนนกำหนดเอง" data-custom-id="${p.id}" />
@@ -323,6 +352,14 @@
   function escapeHtml(s='') { return String(s).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
 
   scoreGrid.addEventListener('click', (e) => {
+    const goodsBtn = e.target.closest('[data-goods-picker]');
+    if (goodsBtn) {
+      pendingGoodsPlayerId = goodsBtn.dataset.goodsPicker;
+      const p = state.players.find(x => x.id === pendingGoodsPlayerId);
+      el('goodsPlayerName').textContent = p ? p.name : '';
+      goodsOverlay.classList.add('show');
+      return;
+    }
     const categoryBtn = e.target.closest('[data-category]');
     if (categoryBtn) {
       const p = state.players.find(x => x.id === categoryBtn.dataset.id);
@@ -446,10 +483,12 @@
     const grid = el('summaryGrid');
     grid.innerHTML = '';
     state.players.forEach(p => {
-      const totals = Object.fromEntries(categories.map(cat => [cat.id, 0]));
+      const totals = Object.fromEntries(scoringCategories.map(cat => [cat.id, 0]));
+      let legacyGoodsTotal = 0;
       let legacyTotal = 0;
       state.history.filter(h => h.playerId === p.id).forEach(h => {
-        if (categories.some(cat => cat.id === h.category)) totals[h.category] += h.delta;
+        if (scoringCategories.some(cat => cat.id === h.category)) totals[h.category] += h.delta;
+        else if (h.category === 'goods_legacy') legacyGoodsTotal += h.delta;
         else legacyTotal += h.delta;
       });
       const card = document.createElement('div');
@@ -460,12 +499,37 @@
           <div class="summary-total">${p.score}</div>
         </div>
         <div class="summary-rows">
-          ${categories.map(cat => `<div class="summary-row"><span>${cat.label}</span><strong>${totals[cat.id]}</strong></div>`).join('')}
+          ${baseCategories.map(cat => `<div class="summary-row"><span>${cat.label}</span><strong>${totals[cat.id]}</strong></div>`).join('')}
+          ${goodsTypes.map(g => `<div class="summary-row"><span>${g.label}</span><strong>${totals[g.id]}</strong></div>`).join('')}
+          ${legacyGoodsTotal !== 0 ? `<div class="summary-row"><span>🎁 สินค้าเดิม (ไม่ระบุชนิด)</span><strong>${legacyGoodsTotal}</strong></div>` : ''}
           ${legacyTotal !== 0 ? `<div class="summary-row"><span>🕘 คะแนนเดิมก่อนแยกประเภท</span><strong>${legacyTotal}</strong></div>` : ''}
         </div>`;
       grid.appendChild(card);
     });
   }
+
+  goodsOverlay.addEventListener('click', e => {
+    const choice = e.target.closest('[data-goods-type]');
+    if (choice && pendingGoodsPlayerId) {
+      const p = state.players.find(x => x.id === pendingGoodsPlayerId);
+      if (p) {
+        p.category = choice.dataset.goodsType;
+        saveState();
+        render();
+      }
+      pendingGoodsPlayerId = null;
+      goodsOverlay.classList.remove('show');
+      return;
+    }
+    if (e.target === goodsOverlay) {
+      pendingGoodsPlayerId = null;
+      goodsOverlay.classList.remove('show');
+    }
+  });
+  el('closeGoodsBtn').addEventListener('click', () => {
+    pendingGoodsPlayerId = null;
+    goodsOverlay.classList.remove('show');
+  });
 
   el('summaryBtn').addEventListener('click', () => { renderSummary(); summaryOverlay.classList.add('show'); });
   el('closeSummaryBtn').addEventListener('click', () => summaryOverlay.classList.remove('show'));
