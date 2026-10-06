@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#efe1bd" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Meeple Score" />
+  <meta name="description" content="Offline scoreboard for tabletop games, designed for Carcassonne sessions." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icons/icon-180.png" />
+  <link rel="icon" href="icons/favicon.svg" type="image/svg+xml" />
+  <title>Meeple Score</title>
+  <style>
+    :root {
+      --paper: #f5ecd3;
+      --paper-2: #eadbb7;
+      --ink: #2a251f;
+      --muted: #756b5c;
+      --card: rgba(255,255,255,.78);
+      --line: rgba(57,45,31,.16);
+      --shadow: 0 10px 28px rgba(69,50,22,.12);
+      --radius: 24px;
+      --tap: 54px;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; min-height: 100%; background: var(--paper); color: var(--ink); font-family: ui-rounded, "SF Pro Rounded", "SF Pro Display", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 15% 0%, rgba(255,255,255,.7), transparent 28%),
+        linear-gradient(135deg, #f7f0dc 0%, #efe1bd 52%, #e8d2a3 100%);
+      padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(22px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+    }
+    button, input, select { font: inherit; }
+    button { touch-action: manipulation; }
+    .app { width: min(1200px, 100%); margin: 0 auto; }
+    header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
+    .brand { display:flex; align-items:center; gap:12px; min-width:0; }
+    .logo { width:48px; height:48px; border-radius:15px; background:#2f553f; color:white; display:grid; place-items:center; box-shadow: var(--shadow); font-size:26px; user-select:none; }
+    .brand h1 { margin:0; font-size:clamp(22px, 3.2vw, 34px); line-height:1; letter-spacing:-.02em; }
+    .brand p { margin:5px 0 0; color:var(--muted); font-size:13px; }
+    .top-actions { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+    .btn { border:1px solid var(--line); background:rgba(255,255,255,.7); color:var(--ink); min-height:46px; border-radius:14px; padding:0 14px; font-weight:750; cursor:pointer; box-shadow:0 3px 10px rgba(50,35,16,.05); }
+    .btn:active { transform:translateY(1px) scale(.99); }
+    .btn.primary { background:#2f553f; color:#fff; border-color:#2f553f; }
+    .btn.danger { color:#8d2d2d; }
+    .score-grid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:14px; }
+    .player-card { position:relative; overflow:hidden; border:1px solid var(--line); background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:18px; min-height:250px; }
+    .player-card::before { content:""; position:absolute; inset:0 auto 0 0; width:8px; background:var(--player); }
+    .player-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+    .player-id { min-width:0; display:flex; align-items:center; gap:10px; }
+    .meeple-dot { width:18px; height:18px; border-radius:6px 6px 5px 5px; background:var(--player); box-shadow: inset 0 0 0 2px rgba(0,0,0,.08); flex:0 0 auto; }
+    .player-name { border:0; background:transparent; padding:4px 0; min-width:0; width:100%; font-weight:850; color:var(--ink); font-size:clamp(18px, 2.4vw, 24px); outline:none; border-bottom:2px solid transparent; }
+    .player-name:focus { border-bottom-color:var(--player); }
+    .score { font-size:clamp(54px, 9vw, 88px); font-weight:950; letter-spacing:-.055em; line-height:.95; margin:12px 0 16px; font-variant-numeric:tabular-nums; }
+    .quick { display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:8px; }
+    .score-btn { min-height:var(--tap); border-radius:15px; border:1px solid rgba(0,0,0,.10); background:#fff; color:var(--ink); font-weight:900; font-size:17px; cursor:pointer; box-shadow:0 3px 8px rgba(60,40,20,.06); }
+    .score-btn:active { transform:scale(.97); background:#f7f7f7; }
+    .score-btn.minus { color:#9a3131; }
+    .custom-row { display:flex; gap:8px; margin-top:9px; }
+    .custom-input { width:100%; min-width:0; min-height:48px; border:1px solid var(--line); border-radius:13px; background:rgba(255,255,255,.82); padding:0 12px; font-size:17px; outline:none; }
+    .custom-input:focus { border-color:var(--player); box-shadow:0 0 0 3px color-mix(in srgb, var(--player) 18%, transparent); }
+    .add-custom { min-width:82px; border:0; border-radius:13px; background:var(--player); color:white; font-weight:900; cursor:pointer; }
+    .footer-bar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:14px; background:rgba(255,255,255,.52); border:1px solid var(--line); border-radius:18px; padding:10px 12px; color:var(--muted); font-size:13px; }
+    .save-state { display:flex; align-items:center; gap:7px; }
+    .save-dot { width:8px; height:8px; border-radius:50%; background:#4c8a64; }
+
+    .overlay { position:fixed; inset:0; z-index:20; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(41,34,26,.42); backdrop-filter:blur(8px); }
+    .overlay.show { display:flex; }
+    .modal { width:min(720px,100%); max-height:min(88vh,900px); overflow:auto; background:#faf5e8; border-radius:28px; padding:22px; box-shadow:0 24px 70px rgba(24,18,10,.28); border:1px solid rgba(255,255,255,.7); }
+    .modal h2 { margin:0 0 5px; font-size:28px; }
+    .modal .hint { margin:0 0 18px; color:var(--muted); }
+    .setup-count { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:16px; }
+    .count-btn { min-height:52px; border-radius:14px; border:1px solid var(--line); background:white; font-weight:900; cursor:pointer; }
+    .count-btn.active { background:#2f553f; color:white; border-color:#2f553f; }
+    .setup-list { display:grid; gap:9px; }
+    .setup-player { display:grid; grid-template-columns:52px 1fr 160px; gap:8px; align-items:center; }
+    .setup-number { width:44px; height:44px; border-radius:13px; display:grid; place-items:center; font-weight:950; background:#eadfca; }
+    .field { min-height:46px; border-radius:12px; border:1px solid var(--line); background:white; padding:0 11px; outline:none; width:100%; }
+    .modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:18px; }
+
+    .history-list { display:grid; gap:8px; margin-top:12px; }
+    .history-item { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 12px; border:1px solid var(--line); border-radius:13px; background:white; }
+    .history-main { display:flex; align-items:center; gap:9px; min-width:0; }
+    .history-color { width:12px; height:12px; border-radius:4px; background:var(--c); flex:0 0 auto; }
+    .history-time { font-size:12px; color:var(--muted); white-space:nowrap; }
+    .empty { text-align:center; padding:28px 10px; color:var(--muted); }
+    .toast { position:fixed; left:50%; bottom:max(22px, env(safe-area-inset-bottom)); transform:translateX(-50%) translateY(14px); background:#2d2924; color:#fff; padding:10px 14px; border-radius:999px; opacity:0; pointer-events:none; transition:.18s ease; z-index:50; font-weight:750; box-shadow:0 12px 28px rgba(0,0,0,.2); }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+    @media (max-width: 760px) {
+      body { padding:12px; }
+      header { align-items:flex-start; }
+      .brand p { display:none; }
+      .top-actions .btn { padding:0 10px; }
+      .score-grid { grid-template-columns:1fr; }
+      .player-card { min-height:0; }
+      .quick { grid-template-columns:repeat(5,1fr); }
+      .setup-player { grid-template-columns:44px 1fr; }
+      .setup-player select { grid-column:2; }
+    }
+    @media (orientation:landscape) and (min-width:900px) {
+      .score-grid.players-3, .score-grid.players-5, .score-grid.players-6 { grid-template-columns:repeat(3,minmax(0,1fr)); }
+      .player-card { padding:16px; }
+      .quick { gap:6px; }
+      .score-btn { min-height:50px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true">♜</div>
+        <div>
+          <h1>Meeple Score</h1>
+          <p>กระดานคะแนนสำหรับโต๊ะเกม • เก็บข้อมูลไว้ในเครื่องนี้</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="btn" id="undoBtn" type="button">↶ Undo</button>
+        <button class="btn" id="historyBtn" type="button">ประวัติ</button>
+        <button class="btn danger" id="newGameBtn" type="button">เกมใหม่</button>
+      </div>
+    </header>
+
+    <section class="score-grid" id="scoreGrid" aria-live="polite"></section>
+
+    <div class="footer-bar">
+      <div class="save-state"><span class="save-dot"></span><span id="saveLabel">บันทึกอัตโนมัติแล้ว</span></div>
+      <div id="gameInfo">พร้อมเล่น</div>
+    </div>
+  </main>
+
+  <div class="overlay" id="setupOverlay" role="dialog" aria-modal="true" aria-labelledby="setupTitle">
+    <div class="modal">
+      <h2 id="setupTitle">ตั้งค่าเกม</h2>
+      <p class="hint">เลือกจำนวนผู้เล่น ตั้งชื่อ และเลือกสีให้ตรงกับ Meeple ที่ใช้จริง</p>
+      <div class="setup-count" id="countChooser"></div>
+      <div class="setup-list" id="setupList"></div>
+      <div class="modal-actions">
+        <button class="btn primary" id="startBtn" type="button">เริ่มเกม</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="historyOverlay" role="dialog" aria-modal="true" aria-labelledby="historyTitle">
+    <div class="modal">
+      <h2 id="historyTitle">ประวัติคะแนน</h2>
+      <p class="hint">รายการล่าสุดอยู่ด้านบน</p>
+      <div class="history-list" id="historyList"></div>
+      <div class="modal-actions">
+        <button class="btn" id="closeHistoryBtn" type="button">ปิด</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+(() => {
+  const STORAGE_KEY = 'meeple-score-v1';
+  const palette = [
+    { name: 'แดง', value: '#c73b3b' },
+    { name: 'น้ำเงิน', value: '#3568b8' },
+    { name: 'เขียว', value: '#3e8055' },
+    { name: 'เหลือง', value: '#c69c22' },
+    { name: 'ดำ', value: '#383838' },
+    { name: 'ชมพู', value: '#b85f86' },
+    { name: 'ม่วง', value: '#7255a3' },
+    { name: 'ส้ม', value: '#c66b2d' }
+  ];
+
+  const defaultState = () => ({
+    started: false,
+    playerCount: 4,
+    players: Array.from({ length: 4 }, (_, i) => ({
+      id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + i),
+      name: `ผู้เล่น ${i + 1}`,
+      color: palette[i].value,
+      score: 0
+    })),
+    history: [],
+    createdAt: Date.now()
+  });
+
+  let state = loadState() || defaultState();
+  let setupCount = state.playerCount || 4;
+
+  const el = id => document.getElementById(id);
+  const scoreGrid = el('scoreGrid');
+  const setupOverlay = el('setupOverlay');
+  const historyOverlay = el('historyOverlay');
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (_) { return null; }
+  }
+
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    el('saveLabel').textContent = 'บันทึกอัตโนมัติแล้ว';
+  }
+
+  function showToast(text) {
+    const t = el('toast');
+    t.textContent = text;
+    t.classList.add('show');
+    clearTimeout(showToast.timer);
+    showToast.timer = setTimeout(() => t.classList.remove('show'), 1500);
+  }
+
+  function render() {
+    scoreGrid.className = `score-grid players-${state.players.length}`;
+    scoreGrid.innerHTML = '';
+
+    state.players.forEach((p) => {
+      const card = document.createElement('article');
+      card.className = 'player-card';
+      card.style.setProperty('--player', p.color);
+      card.innerHTML = `
+        <div class="player-head">
+          <div class="player-id">
+            <span class="meeple-dot" aria-hidden="true"></span>
+            <input class="player-name" aria-label="ชื่อผู้เล่น" value="${escapeHtml(p.name)}" data-name-id="${p.id}" maxlength="24" />
+          </div>
+        </div>
+        <div class="score">${p.score}</div>
+        <div class="quick">
+          <button class="score-btn minus" data-delta="-1" data-id="${p.id}" type="button">−1</button>
+          <button class="score-btn" data-delta="1" data-id="${p.id}" type="button">+1</button>
+          <button class="score-btn" data-delta="2" data-id="${p.id}" type="button">+2</button>
+          <button class="score-btn" data-delta="5" data-id="${p.id}" type="button">+5</button>
+          <button class="score-btn" data-delta="10" data-id="${p.id}" type="button">+10</button>
+        </div>
+        <div class="custom-row">
+          <input class="custom-input" inputmode="numeric" pattern="-?[0-9]*" placeholder="คะแนนอื่น เช่น 12 หรือ -3" aria-label="คะแนนกำหนดเอง" data-custom-id="${p.id}" />
+          <button class="add-custom" data-custom-add="${p.id}" type="button">เพิ่ม</button>
+        </div>`;
+      scoreGrid.appendChild(card);
+    });
+
+    const start = new Date(state.createdAt || Date.now());
+    el('gameInfo').textContent = `${state.players.length} ผู้เล่น • เริ่ม ${start.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})}`;
+  }
+
+  function addScore(id, delta) {
+    const p = state.players.find(x => x.id === id);
+    if (!p || !Number.isFinite(delta) || delta === 0) return;
+    p.score += delta;
+    state.history.push({ id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), playerId:id, name:p.name, color:p.color, delta, after:p.score, at:Date.now() });
+    if (state.history.length > 200) state.history = state.history.slice(-200);
+    saveState();
+    render();
+    if (navigator.vibrate) navigator.vibrate(12);
+  }
+
+  function undo() {
+    const last = state.history.pop();
+    if (!last) return showToast('ยังไม่มีรายการให้ Undo');
+    const p = state.players.find(x => x.id === last.playerId);
+    if (p) p.score -= last.delta;
+    saveState();
+    render();
+    showToast(`ย้อนกลับ ${last.name} ${signed(last.delta)}`);
+  }
+
+  function signed(n) { return n > 0 ? `+${n}` : String(n); }
+  function escapeHtml(s='') { return String(s).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+
+  scoreGrid.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-delta]');
+    if (btn) return addScore(btn.dataset.id, Number(btn.dataset.delta));
+    const customBtn = e.target.closest('[data-custom-add]');
+    if (customBtn) {
+      const input = scoreGrid.querySelector(`[data-custom-id="${CSS.escape(customBtn.dataset.customAdd)}"]`);
+      const val = Number(input?.value);
+      if (!Number.isFinite(val) || val === 0) return showToast('กรอกคะแนนก่อน');
+      addScore(customBtn.dataset.customAdd, val);
+    }
+  });
+
+  scoreGrid.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.target.matches('[data-custom-id]')) {
+      const val = Number(e.target.value);
+      if (Number.isFinite(val) && val !== 0) addScore(e.target.dataset.customId, val);
+    }
+  });
+
+  scoreGrid.addEventListener('change', (e) => {
+    if (!e.target.matches('[data-name-id]')) return;
+    const p = state.players.find(x => x.id === e.target.dataset.nameId);
+    if (!p) return;
+    const name = e.target.value.trim() || 'ผู้เล่น';
+    p.name = name;
+    state.history.forEach(h => { if (h.playerId === p.id) h.name = name; });
+    saveState();
+    render();
+  });
+
+  function renderSetup() {
+    const chooser = el('countChooser');
+    chooser.innerHTML = '';
+    [2,3,4,5,6].forEach(n => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'count-btn' + (n === setupCount ? ' active' : '');
+      b.textContent = n;
+      b.onclick = () => { setupCount = n; renderSetup(); };
+      chooser.appendChild(b);
+    });
+
+    const list = el('setupList');
+    list.innerHTML = '';
+    for (let i = 0; i < setupCount; i++) {
+      const previous = state.players[i];
+      const row = document.createElement('div');
+      row.className = 'setup-player';
+      row.innerHTML = `
+        <div class="setup-number">${i + 1}</div>
+        <input class="field setup-name" value="${escapeHtml(previous?.name || `ผู้เล่น ${i+1}`)}" maxlength="24" aria-label="ชื่อผู้เล่น ${i+1}" />
+        <select class="field setup-color" aria-label="สีผู้เล่น ${i+1}">
+          ${palette.map((c, idx) => `<option value="${c.value}" ${(previous?.color || palette[i % palette.length].value) === c.value ? 'selected' : ''}>${c.name}</option>`).join('')}
+        </select>`;
+      list.appendChild(row);
+    }
+  }
+
+  function openSetup() { setupCount = state.playerCount || state.players.length || 4; renderSetup(); setupOverlay.classList.add('show'); }
+  function closeSetup() { setupOverlay.classList.remove('show'); }
+
+  el('startBtn').addEventListener('click', () => {
+    const rows = [...el('setupList').querySelectorAll('.setup-player')];
+    const used = new Set();
+    const players = rows.map((row, i) => {
+      let color = row.querySelector('.setup-color').value;
+      if (used.has(color)) {
+        color = palette.find(c => !used.has(c.value))?.value || color;
+      }
+      used.add(color);
+      return {
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + i),
+        name: row.querySelector('.setup-name').value.trim() || `ผู้เล่น ${i+1}`,
+        color,
+        score: 0
+      };
+    });
+    state = { started:true, playerCount:setupCount, players, history:[], createdAt:Date.now() };
+    saveState();
+    closeSetup();
+    render();
+  });
+
+  el('undoBtn').addEventListener('click', undo);
+  el('newGameBtn').addEventListener('click', () => {
+    if (state.started && state.history.length && !confirm('เริ่มเกมใหม่? คะแนนและประวัติเกมปัจจุบันจะถูกล้าง')) return;
+    openSetup();
+  });
+
+  function renderHistory() {
+    const list = el('historyList');
+    list.innerHTML = '';
+    if (!state.history.length) {
+      list.innerHTML = '<div class="empty">ยังไม่มีการเพิ่มหรือลดคะแนน</div>';
+      return;
+    }
+    [...state.history].reverse().forEach(h => {
+      const item = document.createElement('div');
+      item.className = 'history-item';
+      item.innerHTML = `
+        <div class="history-main"><span class="history-color" style="--c:${h.color}"></span><strong>${escapeHtml(h.name)}</strong><span>${signed(h.delta)} → ${h.after}</span></div>
+        <span class="history-time">${new Date(h.at).toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})}</span>`;
+      list.appendChild(item);
+    });
+  }
+  el('historyBtn').addEventListener('click', () => { renderHistory(); historyOverlay.classList.add('show'); });
+  el('closeHistoryBtn').addEventListener('click', () => historyOverlay.classList.remove('show'));
+  historyOverlay.addEventListener('click', e => { if (e.target === historyOverlay) historyOverlay.classList.remove('show'); });
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+  }
+
+  render();
+  if (!state.started) openSetup();
+})();
+</script>
+</body>
+</html>
