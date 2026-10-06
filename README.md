@@ -13,7 +13,9 @@ Designed to run smoothly on an iPad, Meeple Score replaces the physical scoring 
 - ➕ Quick score buttons: **-1, +1, +2, +5, +10**
 - 🔢 Add or subtract any custom score
 - ↩️ Undo the latest score change
-- 🕘 Score history
+- 🏰 Detailed scoring categories: **City, Road, Church, Farmer, and Goods**
+- 📊 Per-player score breakdown by category
+- 🕘 Score history with scoring category
 - 💾 Automatic saving with `localStorage`
 - 📱 Optimized for touch screens and iPad
 - 🏠 Installable with **Add to Home Screen**
@@ -90,8 +92,8 @@ Any future update committed to the deployment branch can be published to the sam
 
 ## 🗺️ Possible Future Improvements
 
-- Detailed scoring categories such as City, Road, Monastery, and Field
-- End-of-game summary
+- Expansion modifiers/tags such as Inn, Cathedral, Pig, and Big Meeple
+- Enhanced end-of-game summary
 - Per-player statistics
 - Multiple saved games
 - Improved game history
