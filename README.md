@@ -1,28 +1,103 @@
-# Meeple Score
+# 🧩 Meeple Score
 
-เว็บนับคะแนนแบบออฟไลน์สำหรับใช้คู่กับบอร์ดเกมบน iPad
+A lightweight, touch-friendly score tracker for **Carcassonne** and other tabletop games.
 
-## ฟีเจอร์เวอร์ชัน 1
-- ผู้เล่น 2–6 คน
-- ตั้งชื่อและเลือกสีผู้เล่น
-- ปุ่ม -1, +1, +2, +5, +10
-- กรอกคะแนนจำนวนอื่นได้ เช่น +12 หรือ -3
-- Undo การเปลี่ยนคะแนนล่าสุด
-- History ย้อนหลัง
-- บันทึกอัตโนมัติด้วย localStorage
-- PWA / Add to Home Screen
-- Service Worker สำหรับใช้งานออฟไลน์หลังจากโหลดเว็บสำเร็จครั้งแรก
+Designed to run smoothly on an iPad, Meeple Score replaces the physical scoring track when your game goes beyond the board's score limit — especially useful when playing with expansions.
 
-## ทดลองบนคอม
-เนื่องจาก PWA/Service Worker ต้องเปิดผ่าน HTTP/HTTPS ไม่ควรดับเบิลคลิก `index.html` หากต้องการทดสอบโหมดออฟไลน์
+> **Live app:** https://leowpailoei.github.io/meeple-score/
 
-วิธีง่ายเมื่อมี Python:
+## ✨ Features
+
+- 👥 Supports **2–6 players**
+- 🎨 Custom player names and colors
+- ➕ Quick score buttons: **-1, +1, +2, +5, +10**
+- 🔢 Add or subtract any custom score
+- ↩️ Undo the latest score change
+- 🕘 Score history
+- 💾 Automatic saving with `localStorage`
+- 📱 Optimized for touch screens and iPad
+- 🏠 Installable with **Add to Home Screen**
+- 🌐 Works offline after the first successful load
+- 🚫 No account, database, or server required
+
+## 🎯 Why Meeple Score?
+
+Carcassonne's physical score track works well for the base game, but scores can quickly exceed its limit when expansions are added.
+
+Meeple Score is designed to sit beside the board during a game:
+
+1. Open the app on an iPad or tablet
+2. Set up the players
+3. Tap whenever someone earns points
+4. Keep playing — there is no practical score limit
+
+Your current game is saved automatically in the browser, so refreshing or reopening the page does not immediately reset the score.
+
+## 📱 Install on iPad
+
+Open the live app in **Safari**:
+
+https://leowpailoei.github.io/meeple-score/
+
+Then choose:
+
+**Share → Add to Home Screen**
+
+Meeple Score can then be launched from the Home Screen like an app.
+
+## 💾 How data is stored
+
+Meeple Score currently uses browser `localStorage`.
+
+That means:
+
+- Scores are stored on the device/browser you are using
+- No player data is uploaded to GitHub
+- No sign-in is required
+- Different devices do not automatically sync with each other
+- Clearing browser website data may remove saved game data
+
+## 🛠️ Built With
+
+- HTML
+- CSS
+- JavaScript
+- Progressive Web App (PWA)
+- Service Worker
+- GitHub Pages
+
+## 💻 Run Locally
+
+Because the PWA and Service Worker require HTTP/HTTPS, run the project through a local web server instead of opening `index.html` directly.
+
+If Python is installed:
 
 ```bash
 python -m http.server 8000
 ```
 
-แล้วเปิด http://localhost:8000
+Then open:
 
-## Deploy ฟรี
-สามารถอัปโหลดโฟลเดอร์นี้ขึ้น GitHub Pages, Cloudflare Pages, Netlify หรือ Vercel ได้
+```text
+http://localhost:8000
+```
+
+## 🚀 Deployment
+
+This project is deployed for free with **GitHub Pages** from the `main` branch.
+
+Any future update committed to the deployment branch can be published to the same website URL.
+
+## 🗺️ Possible Future Improvements
+
+- Detailed scoring categories such as City, Road, Monastery, and Field
+- End-of-game summary
+- Per-player statistics
+- Multiple saved games
+- Improved game history
+- More customization options
+- Optional synchronization between devices
+
+---
+
+Made for easier scoring around the Carcassonne table. 🏰
