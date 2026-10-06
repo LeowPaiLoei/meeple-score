@@ -10,11 +10,12 @@ Designed to run smoothly on an iPad, Meeple Score replaces the physical scoring 
 
 - 👥 Supports **2–6 players**
 - 🎨 Custom player names and colors
-- ➕ Quick score buttons: **-1, +1, +2, +5, +10**
-- 🔢 Add or subtract any custom score
+- ➕ Quick score buttons: **+1 through +10**
+- 🔢 Add any custom score (negative values are still available for corrections)
 - ↩️ Undo the latest score change
 - 🏰 Detailed scoring categories: **City, Road, Church, Farmer, and Goods**
-- 📊 Per-player score breakdown by category
+- 🎁 Goods picker with separate **Chicken, Cloth, and Rice** entries
+- 📊 Per-player score breakdown by category and goods type
 - 🕘 Score history with scoring category
 - 💾 Automatic saving with `localStorage`
 - 📱 Optimized for touch screens and iPad
