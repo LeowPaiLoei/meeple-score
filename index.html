@@ -201,13 +201,12 @@
   const categories = [
     { id:'city', label:'🏰 เมือง' },
     { id:'road', label:'🛣️ ถนน' },
-    { id:'monastery', label:'⛪ อาราม' },
-    { id:'field', label:'🌾 ทุ่ง' },
-    { id:'expansion', label:'🧩 ภาคเสริม' },
-    { id:'other', label:'⭐ อื่น ๆ' }
+    { id:'monastery', label:'⛪ โบสถ์' },
+    { id:'field', label:'🌾 นอนหญ้า' },
+    { id:'goods', label:'🎁 สินค้า' }
   ];
 
-  const categoryLabel = id => categories.find(c => c.id === id)?.label || '⭐ อื่น ๆ';
+  const categoryLabel = id => categories.find(c => c.id === id)?.label || '🕘 ไม่ระบุ (ข้อมูลเก่า)';
 
   const defaultState = () => ({
     started: false,
@@ -224,8 +223,14 @@
   });
 
   let state = loadState() || defaultState();
-  state.players = (state.players || []).map(p => ({ ...p, category: p.category || 'city' }));
-  state.history = (state.history || []).map(h => ({ ...h, category: h.category || 'other' }));
+  state.players = (state.players || []).map(p => ({
+    ...p,
+    category: p.category === 'expansion' ? 'goods' : (categories.some(cat => cat.id === p.category) ? p.category : 'city')
+  }));
+  state.history = (state.history || []).map(h => ({
+    ...h,
+    category: h.category === 'expansion' ? 'goods' : (categories.some(cat => cat.id === h.category) ? h.category : 'legacy')
+  }));
   let setupCount = state.playerCount || 4;
 
   const el = id => document.getElementById(id);
@@ -442,9 +447,10 @@
     grid.innerHTML = '';
     state.players.forEach(p => {
       const totals = Object.fromEntries(categories.map(cat => [cat.id, 0]));
+      let legacyTotal = 0;
       state.history.filter(h => h.playerId === p.id).forEach(h => {
-        const key = categories.some(cat => cat.id === h.category) ? h.category : 'other';
-        totals[key] += h.delta;
+        if (categories.some(cat => cat.id === h.category)) totals[h.category] += h.delta;
+        else legacyTotal += h.delta;
       });
       const card = document.createElement('div');
       card.className = 'summary-card';
@@ -455,6 +461,7 @@
         </div>
         <div class="summary-rows">
           ${categories.map(cat => `<div class="summary-row"><span>${cat.label}</span><strong>${totals[cat.id]}</strong></div>`).join('')}
+          ${legacyTotal !== 0 ? `<div class="summary-row"><span>🕘 คะแนนเดิมก่อนแยกประเภท</span><strong>${legacyTotal}</strong></div>` : ''}
         </div>`;
       grid.appendChild(card);
     });
