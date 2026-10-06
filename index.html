@@ -63,6 +63,19 @@
     .custom-input { width:100%; min-width:0; min-height:48px; border:1px solid var(--line); border-radius:13px; background:rgba(255,255,255,.82); padding:0 12px; font-size:17px; outline:none; }
     .custom-input:focus { border-color:var(--player); box-shadow:0 0 0 3px color-mix(in srgb, var(--player) 18%, transparent); }
     .add-custom { min-width:82px; border:0; border-radius:13px; background:var(--player); color:white; font-weight:900; cursor:pointer; }
+    .category-label { margin:12px 0 7px; color:var(--muted); font-size:12px; font-weight:850; letter-spacing:.02em; text-transform:uppercase; }
+    .categories { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; margin-bottom:10px; }
+    .category-btn { min-height:42px; border-radius:12px; border:1px solid var(--line); background:rgba(255,255,255,.74); color:var(--ink); font-size:13px; font-weight:850; cursor:pointer; }
+    .category-btn.active { background:var(--player); color:#fff; border-color:var(--player); box-shadow:0 3px 10px rgba(0,0,0,.10); }
+    .category-btn:active { transform:scale(.98); }
+    .summary-grid { display:grid; gap:12px; margin-top:14px; }
+    .summary-card { border:1px solid var(--line); border-radius:16px; background:#fff; padding:14px; }
+    .summary-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px; }
+    .summary-player { display:flex; align-items:center; gap:9px; font-weight:900; font-size:18px; }
+    .summary-total { font-weight:950; font-size:24px; }
+    .summary-rows { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px 14px; }
+    .summary-row { display:flex; align-items:center; justify-content:space-between; gap:8px; color:var(--muted); }
+    .summary-row strong { color:var(--ink); font-variant-numeric:tabular-nums; }
     .footer-bar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:14px; background:rgba(255,255,255,.52); border:1px solid var(--line); border-radius:18px; padding:10px 12px; color:var(--muted); font-size:13px; }
     .save-state { display:flex; align-items:center; gap:7px; }
     .save-dot { width:8px; height:8px; border-radius:50%; background:#4c8a64; }
@@ -122,6 +135,7 @@
       <div class="top-actions">
         <button class="btn" id="undoBtn" type="button">↶ Undo</button>
         <button class="btn" id="historyBtn" type="button">ประวัติ</button>
+        <button class="btn" id="summaryBtn" type="button">สรุปคะแนน</button>
         <button class="btn danger" id="newGameBtn" type="button">เกมใหม่</button>
       </div>
     </header>
@@ -157,6 +171,17 @@
     </div>
   </div>
 
+  <div class="overlay" id="summaryOverlay" role="dialog" aria-modal="true" aria-labelledby="summaryTitle">
+    <div class="modal">
+      <h2 id="summaryTitle">สรุปคะแนนตามประเภท</h2>
+      <p class="hint">ดูว่าผู้เล่นแต่ละคนได้คะแนนจากส่วนไหนของเกมบ้าง</p>
+      <div class="summary-grid" id="summaryGrid"></div>
+      <div class="modal-actions">
+        <button class="btn" id="closeSummaryBtn" type="button">ปิด</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
 <script>
@@ -173,6 +198,17 @@
     { name: 'ส้ม', value: '#c66b2d' }
   ];
 
+  const categories = [
+    { id:'city', label:'🏰 เมือง' },
+    { id:'road', label:'🛣️ ถนน' },
+    { id:'monastery', label:'⛪ อาราม' },
+    { id:'field', label:'🌾 ทุ่ง' },
+    { id:'expansion', label:'🧩 ภาคเสริม' },
+    { id:'other', label:'⭐ อื่น ๆ' }
+  ];
+
+  const categoryLabel = id => categories.find(c => c.id === id)?.label || '⭐ อื่น ๆ';
+
   const defaultState = () => ({
     started: false,
     playerCount: 4,
@@ -180,19 +216,23 @@
       id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + i),
       name: `ผู้เล่น ${i + 1}`,
       color: palette[i].value,
-      score: 0
+      score: 0,
+      category: 'city'
     })),
     history: [],
     createdAt: Date.now()
   });
 
   let state = loadState() || defaultState();
+  state.players = (state.players || []).map(p => ({ ...p, category: p.category || 'city' }));
+  state.history = (state.history || []).map(h => ({ ...h, category: h.category || 'other' }));
   let setupCount = state.playerCount || 4;
 
   const el = id => document.getElementById(id);
   const scoreGrid = el('scoreGrid');
   const setupOverlay = el('setupOverlay');
   const historyOverlay = el('historyOverlay');
+  const summaryOverlay = el('summaryOverlay');
 
   function loadState() {
     try {
@@ -230,6 +270,10 @@
           </div>
         </div>
         <div class="score">${p.score}</div>
+        <div class="category-label">ประเภทคะแนน</div>
+        <div class="categories">
+          ${categories.map(cat => `<button class="category-btn ${(p.category || 'city') === cat.id ? 'active' : ''}" data-category="${cat.id}" data-id="${p.id}" type="button">${cat.label}</button>`).join('')}
+        </div>
         <div class="quick">
           <button class="score-btn minus" data-delta="-1" data-id="${p.id}" type="button">−1</button>
           <button class="score-btn" data-delta="1" data-id="${p.id}" type="button">+1</button>
@@ -252,7 +296,8 @@
     const p = state.players.find(x => x.id === id);
     if (!p || !Number.isFinite(delta) || delta === 0) return;
     p.score += delta;
-    state.history.push({ id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), playerId:id, name:p.name, color:p.color, delta, after:p.score, at:Date.now() });
+    const category = p.category || 'other';
+    state.history.push({ id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), playerId:id, name:p.name, color:p.color, category, delta, after:p.score, at:Date.now() });
     if (state.history.length > 200) state.history = state.history.slice(-200);
     saveState();
     render();
@@ -273,6 +318,16 @@
   function escapeHtml(s='') { return String(s).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
 
   scoreGrid.addEventListener('click', (e) => {
+    const categoryBtn = e.target.closest('[data-category]');
+    if (categoryBtn) {
+      const p = state.players.find(x => x.id === categoryBtn.dataset.id);
+      if (p) {
+        p.category = categoryBtn.dataset.category;
+        saveState();
+        render();
+      }
+      return;
+    }
     const btn = e.target.closest('[data-delta]');
     if (btn) return addScore(btn.dataset.id, Number(btn.dataset.delta));
     const customBtn = e.target.closest('[data-custom-add]');
@@ -346,7 +401,8 @@
         id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + i),
         name: row.querySelector('.setup-name').value.trim() || `ผู้เล่น ${i+1}`,
         color,
-        score: 0
+        score: 0,
+        category: 'city'
       };
     });
     state = { started:true, playerCount:setupCount, players, history:[], createdAt:Date.now() };
@@ -372,7 +428,7 @@
       const item = document.createElement('div');
       item.className = 'history-item';
       item.innerHTML = `
-        <div class="history-main"><span class="history-color" style="--c:${h.color}"></span><strong>${escapeHtml(h.name)}</strong><span>${signed(h.delta)} → ${h.after}</span></div>
+        <div class="history-main"><span class="history-color" style="--c:${h.color}"></span><strong>${escapeHtml(h.name)}</strong><span>${categoryLabel(h.category)} • ${signed(h.delta)} → ${h.after}</span></div>
         <span class="history-time">${new Date(h.at).toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})}</span>`;
       list.appendChild(item);
     });
@@ -380,6 +436,33 @@
   el('historyBtn').addEventListener('click', () => { renderHistory(); historyOverlay.classList.add('show'); });
   el('closeHistoryBtn').addEventListener('click', () => historyOverlay.classList.remove('show'));
   historyOverlay.addEventListener('click', e => { if (e.target === historyOverlay) historyOverlay.classList.remove('show'); });
+
+  function renderSummary() {
+    const grid = el('summaryGrid');
+    grid.innerHTML = '';
+    state.players.forEach(p => {
+      const totals = Object.fromEntries(categories.map(cat => [cat.id, 0]));
+      state.history.filter(h => h.playerId === p.id).forEach(h => {
+        const key = categories.some(cat => cat.id === h.category) ? h.category : 'other';
+        totals[key] += h.delta;
+      });
+      const card = document.createElement('div');
+      card.className = 'summary-card';
+      card.innerHTML = `
+        <div class="summary-head">
+          <div class="summary-player"><span class="history-color" style="--c:${p.color}"></span><span>${escapeHtml(p.name)}</span></div>
+          <div class="summary-total">${p.score}</div>
+        </div>
+        <div class="summary-rows">
+          ${categories.map(cat => `<div class="summary-row"><span>${cat.label}</span><strong>${totals[cat.id]}</strong></div>`).join('')}
+        </div>`;
+      grid.appendChild(card);
+    });
+  }
+
+  el('summaryBtn').addEventListener('click', () => { renderSummary(); summaryOverlay.classList.add('show'); });
+  el('closeSummaryBtn').addEventListener('click', () => summaryOverlay.classList.remove('show'));
+  summaryOverlay.addEventListener('click', e => { if (e.target === summaryOverlay) summaryOverlay.classList.remove('show'); });
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
