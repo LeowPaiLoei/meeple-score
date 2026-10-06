@@ -58,6 +58,7 @@
     .quick { display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:8px; }
     .score-btn { min-height:var(--tap); border-radius:15px; border:1px solid rgba(0,0,0,.10); background:#fff; color:var(--ink); font-weight:900; font-size:17px; cursor:pointer; box-shadow:0 3px 8px rgba(60,40,20,.06); }
     .score-btn:active { transform:scale(.97); background:#f7f7f7; }
+    .score-btn.selected { background:var(--player); color:#fff; border-color:var(--player); box-shadow:0 4px 12px color-mix(in srgb, var(--player) 24%, transparent); }
     .custom-row { display:flex; gap:8px; margin-top:9px; }
     .custom-input { width:100%; min-width:0; min-height:48px; border:1px solid var(--line); border-radius:13px; background:rgba(255,255,255,.82); padding:0 12px; font-size:17px; outline:none; }
     .custom-input:focus { border-color:var(--player); box-shadow:0 0 0 3px color-mix(in srgb, var(--player) 18%, transparent); }
@@ -71,13 +72,16 @@
     .goods-choice { min-height:110px; border-radius:18px; border:1px solid var(--line); background:#fff; color:var(--ink); cursor:pointer; font-weight:900; font-size:34px; display:grid; place-items:center; align-content:center; gap:7px; box-shadow:0 4px 12px rgba(60,40,20,.06); }
     .goods-choice span { font-size:17px; }
     .goods-choice:active { transform:scale(.97); background:#f7f1e4; }
-    .summary-grid { display:grid; gap:12px; margin-top:14px; }
-    .summary-card { border:1px solid var(--line); border-radius:16px; background:#fff; padding:14px; }
-    .summary-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:10px; }
-    .summary-player { display:flex; align-items:center; gap:9px; font-weight:900; font-size:18px; }
-    .summary-total { font-weight:950; font-size:24px; }
-    .summary-rows { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px 14px; }
-    .summary-row { display:flex; align-items:center; justify-content:space-between; gap:8px; color:var(--muted); }
+    .summary-modal { width:min(1120px,96vw); max-height:92vh; padding:18px; }
+    .summary-modal h2 { font-size:25px; }
+    .summary-modal .hint { margin-bottom:10px; }
+    .summary-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:10px; }
+    .summary-card { border:1px solid var(--line); border-radius:15px; background:#fff; padding:11px 12px; }
+    .summary-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:7px; }
+    .summary-player { display:flex; align-items:center; gap:8px; font-weight:900; font-size:16px; }
+    .summary-total { font-weight:950; font-size:22px; }
+    .summary-rows { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px 12px; }
+    .summary-row { display:flex; align-items:center; justify-content:space-between; gap:7px; color:var(--muted); font-size:13px; line-height:1.25; }
     .summary-row strong { color:var(--ink); font-variant-numeric:tabular-nums; }
     .footer-bar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:14px; background:rgba(255,255,255,.52); border:1px solid var(--line); border-radius:18px; padding:10px 12px; color:var(--muted); font-size:13px; }
     .save-state { display:flex; align-items:center; gap:7px; }
@@ -145,7 +149,13 @@
     body.six-player-mode .add-custom { min-width:62px; border-radius:10px; font-size:14px; }
     body.six-player-mode .footer-bar { margin-top:8px; padding:7px 10px; border-radius:14px; font-size:11px; }
 
+    @media (max-width: 620px) {
+      .summary-grid { grid-template-columns:1fr; }
+    }
     @media (orientation:landscape) and (min-width:900px) {
+      .summary-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+      .summary-modal { width:min(1180px,96vw); }
+
       .score-grid.players-3, .score-grid.players-5, .score-grid.players-6 { grid-template-columns:repeat(3,minmax(0,1fr)); }
       .player-card { padding:16px; }
       .quick { gap:6px; }
@@ -213,7 +223,7 @@
   </div>
 
   <div class="overlay" id="summaryOverlay" role="dialog" aria-modal="true" aria-labelledby="summaryTitle">
-    <div class="modal">
+    <div class="modal summary-modal">
       <h2 id="summaryTitle">สรุปคะแนนตามประเภท</h2>
       <p class="hint">ดูว่าผู้เล่นแต่ละคนได้คะแนนจากส่วนไหนของเกมบ้าง</p>
       <div class="summary-grid" id="summaryGrid"></div>
@@ -280,7 +290,8 @@
       name: `ผู้เล่น ${i + 1}`,
       color: palette[i].value,
       score: 0,
-      category: 'city'
+      category: 'city',
+      draftScore: ''
     })),
     history: [],
     createdAt: Date.now()
@@ -289,7 +300,8 @@
   let state = loadState() || defaultState();
   state.players = (state.players || []).map(p => ({
     ...p,
-    category: scoringCategories.some(cat => cat.id === p.category) ? p.category : 'city'
+    category: scoringCategories.some(cat => cat.id === p.category) ? p.category : 'city',
+    draftScore: p.draftScore ?? ''
   }));
   state.history = (state.history || []).map(h => ({
     ...h,
@@ -352,10 +364,10 @@
           </button>
         </div>
         <div class="quick">
-          ${Array.from({ length: 10 }, (_, i) => i + 1).map(n => `<button class="score-btn" data-delta="${n}" data-id="${p.id}" type="button">+${n}</button>`).join('')}
+          ${Array.from({ length: 10 }, (_, i) => i + 1).map(n => `<button class="score-btn ${Number(p.draftScore) === n && String(p.draftScore).trim() !== '' ? 'selected' : ''}" data-delta="${n}" data-id="${p.id}" type="button">+${n}</button>`).join('')}
         </div>
         <div class="custom-row">
-          <input class="custom-input" inputmode="numeric" pattern="-?[0-9]*" placeholder="คะแนนอื่น เช่น 12 หรือ -3" aria-label="คะแนนกำหนดเอง" data-custom-id="${p.id}" />
+          <input class="custom-input" inputmode="numeric" pattern="-?[0-9]*" value="${escapeHtml(p.draftScore ?? '')}" placeholder="เลือก +1 ถึง +10 หรือกรอกคะแนนเอง" aria-label="คะแนนกำหนดเอง" data-custom-id="${p.id}" />
           <button class="add-custom" data-custom-add="${p.id}" type="button">เพิ่ม</button>
         </div>`;
       scoreGrid.appendChild(card);
@@ -369,7 +381,8 @@
     const p = state.players.find(x => x.id === id);
     if (!p || !Number.isFinite(delta) || delta === 0) return;
     p.score += delta;
-    const category = p.category || 'other';
+    p.draftScore = '';
+    const category = p.category || 'legacy';
     state.history.push({ id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), playerId:id, name:p.name, color:p.color, category, delta, after:p.score, at:Date.now() });
     if (state.history.length > 200) state.history = state.history.slice(-200);
     saveState();
@@ -410,20 +423,43 @@
       return;
     }
     const btn = e.target.closest('[data-delta]');
-    if (btn) return addScore(btn.dataset.id, Number(btn.dataset.delta));
+    if (btn) {
+      const p = state.players.find(x => x.id === btn.dataset.id);
+      if (!p) return;
+      p.draftScore = String(btn.dataset.delta);
+      saveState();
+      render();
+      return;
+    }
     const customBtn = e.target.closest('[data-custom-add]');
     if (customBtn) {
+      const p = state.players.find(x => x.id === customBtn.dataset.customAdd);
       const input = scoreGrid.querySelector(`[data-custom-id="${CSS.escape(customBtn.dataset.customAdd)}"]`);
-      const val = Number(input?.value);
-      if (!Number.isFinite(val) || val === 0) return showToast('กรอกคะแนนก่อน');
+      const raw = input?.value?.trim() ?? '';
+      const val = Number(raw);
+      if (!p || raw === '' || !Number.isFinite(val) || val === 0) return showToast('เลือกหรือกรอกคะแนนก่อน');
+      p.draftScore = raw;
       addScore(customBtn.dataset.customAdd, val);
     }
   });
 
+  scoreGrid.addEventListener('input', (e) => {
+    if (!e.target.matches('[data-custom-id]')) return;
+    const p = state.players.find(x => x.id === e.target.dataset.customId);
+    if (!p) return;
+    p.draftScore = e.target.value;
+    saveState();
+    const card = e.target.closest('.player-card');
+    card?.querySelectorAll('[data-delta]').forEach(btn => {
+      btn.classList.toggle('selected', Number(e.target.value) === Number(btn.dataset.delta) && e.target.value.trim() !== '');
+    });
+  });
+
   scoreGrid.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && e.target.matches('[data-custom-id]')) {
-      const val = Number(e.target.value);
-      if (Number.isFinite(val) && val !== 0) addScore(e.target.dataset.customId, val);
+      e.preventDefault();
+      e.target.blur();
+      showToast('กด “เพิ่ม” เพื่อยืนยันคะแนน');
     }
   });
 
@@ -483,7 +519,8 @@
         name: row.querySelector('.setup-name').value.trim() || `ผู้เล่น ${i+1}`,
         color,
         score: 0,
-        category: 'city'
+        category: 'city',
+        draftScore: ''
       };
     });
     state = { started:true, playerCount:setupCount, players, history:[], createdAt:Date.now() };
