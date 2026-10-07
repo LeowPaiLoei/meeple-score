@@ -121,33 +121,33 @@
       .setup-player { grid-template-columns:44px 1fr; }
       .setup-player select { grid-column:2; }
     }
-    /* Compact layout for a full 6-player table on iPad */
-    body.six-player-mode {
+    /* Consistent compact layout for 2–6 players, optimized for iPad */
+    body.compact-mode {
       padding-top:max(10px, env(safe-area-inset-top));
       padding-bottom:max(10px, env(safe-area-inset-bottom));
     }
-    body.six-player-mode header { margin-bottom:8px; }
-    body.six-player-mode .logo { width:42px; height:42px; border-radius:13px; font-size:22px; }
-    body.six-player-mode .brand h1 { font-size:clamp(22px,2.5vw,30px); }
-    body.six-player-mode .brand p { margin-top:3px; font-size:11px; }
-    body.six-player-mode .top-actions { gap:6px; }
-    body.six-player-mode .top-actions .btn { min-height:40px; border-radius:12px; padding:0 11px; font-size:14px; }
-    body.six-player-mode .score-grid { gap:10px; }
-    body.six-player-mode .player-card { padding:11px 12px 12px 16px; border-radius:19px; min-height:0; }
-    body.six-player-mode .player-card::before { width:7px; }
-    body.six-player-mode .player-head { margin-bottom:1px; }
-    body.six-player-mode .meeple-dot { width:15px; height:15px; }
-    body.six-player-mode .player-name { font-size:18px; padding:2px 0; }
-    body.six-player-mode .score { font-size:56px; line-height:.9; margin:4px 0 7px; }
-    body.six-player-mode .category-label { margin:4px 0 4px; font-size:10px; }
-    body.six-player-mode .categories { grid-template-columns:repeat(5,minmax(0,1fr)); gap:4px; margin-bottom:6px; }
-    body.six-player-mode .category-btn { min-height:36px; border-radius:10px; padding:2px 3px; font-size:10.5px; line-height:1.15; }
-    body.six-player-mode .quick { grid-template-columns:repeat(5,minmax(0,1fr)); gap:5px; }
-    body.six-player-mode .score-btn { min-height:39px; border-radius:11px; font-size:15px; }
-    body.six-player-mode .custom-row { gap:6px; margin-top:6px; }
-    body.six-player-mode .custom-input { min-height:39px; border-radius:10px; padding:0 9px; font-size:13px; }
-    body.six-player-mode .add-custom { min-width:62px; border-radius:10px; font-size:14px; }
-    body.six-player-mode .footer-bar { margin-top:8px; padding:7px 10px; border-radius:14px; font-size:11px; }
+    body.compact-mode header { margin-bottom:8px; }
+    body.compact-mode .logo { width:42px; height:42px; border-radius:13px; font-size:22px; }
+    body.compact-mode .brand h1 { font-size:clamp(22px,2.5vw,30px); }
+    body.compact-mode .brand p { margin-top:3px; font-size:11px; }
+    body.compact-mode .top-actions { gap:6px; }
+    body.compact-mode .top-actions .btn { min-height:40px; border-radius:12px; padding:0 11px; font-size:14px; }
+    body.compact-mode .score-grid { gap:10px; }
+    body.compact-mode .player-card { padding:11px 12px 12px 16px; border-radius:19px; min-height:0; }
+    body.compact-mode .player-card::before { width:7px; }
+    body.compact-mode .player-head { margin-bottom:1px; }
+    body.compact-mode .meeple-dot { width:15px; height:15px; }
+    body.compact-mode .player-name { font-size:18px; padding:2px 0; }
+    body.compact-mode .score { font-size:56px; line-height:.9; margin:4px 0 7px; }
+    body.compact-mode .category-label { margin:4px 0 4px; font-size:10px; }
+    body.compact-mode .categories { grid-template-columns:repeat(5,minmax(0,1fr)); gap:4px; margin-bottom:6px; }
+    body.compact-mode .category-btn { min-height:36px; border-radius:10px; padding:2px 3px; font-size:10.5px; line-height:1.15; }
+    body.compact-mode .quick { grid-template-columns:repeat(5,minmax(0,1fr)); gap:5px; }
+    body.compact-mode .score-btn { min-height:39px; border-radius:11px; font-size:15px; }
+    body.compact-mode .custom-row { gap:6px; margin-top:6px; }
+    body.compact-mode .custom-input { min-height:39px; border-radius:10px; padding:0 9px; font-size:13px; }
+    body.compact-mode .add-custom { min-width:62px; border-radius:10px; font-size:14px; }
+    body.compact-mode .footer-bar { margin-top:8px; padding:7px 10px; border-radius:14px; font-size:11px; }
 
     @media (max-width: 620px) {
       .summary-grid { grid-template-columns:1fr; }
@@ -161,15 +161,15 @@
       .quick { gap:6px; }
       .score-btn { min-height:50px; }
 
-      body.six-player-mode .player-card { padding:10px 11px 11px 15px; }
-      body.six-player-mode .score { font-size:52px; margin:2px 0 5px; }
-      body.six-player-mode .categories { gap:3px; margin-bottom:5px; }
-      body.six-player-mode .category-btn { min-height:33px; font-size:9.8px; }
-      body.six-player-mode .quick { gap:4px; }
-      body.six-player-mode .score-btn { min-height:36px; font-size:14px; }
-      body.six-player-mode .custom-row { margin-top:5px; }
-      body.six-player-mode .custom-input { min-height:36px; }
-      body.six-player-mode .add-custom { min-height:36px; }
+      body.compact-mode .player-card { padding:10px 11px 11px 15px; }
+      body.compact-mode .score { font-size:52px; margin:2px 0 5px; }
+      body.compact-mode .categories { gap:3px; margin-bottom:5px; }
+      body.compact-mode .category-btn { min-height:33px; font-size:9.8px; }
+      body.compact-mode .quick { gap:4px; }
+      body.compact-mode .score-btn { min-height:36px; font-size:14px; }
+      body.compact-mode .custom-row { margin-top:5px; }
+      body.compact-mode .custom-input { min-height:36px; }
+      body.compact-mode .add-custom { min-height:36px; }
     }
   </style>
 </head>
@@ -340,7 +340,7 @@
   }
 
   function render() {
-    document.body.classList.toggle('six-player-mode', state.players.length === 6);
+    document.body.classList.toggle('compact-mode', state.players.length >= 2 && state.players.length <= 6);
     scoreGrid.className = `score-grid players-${state.players.length}`;
     scoreGrid.innerHTML = '';
 
