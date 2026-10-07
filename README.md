@@ -18,7 +18,7 @@ Designed to run smoothly on an iPad, Meeple Score replaces the physical scoring 
 - 📊 Per-player score breakdown by category and goods type
 - 🕘 Score history with scoring category
 - 💾 Automatic saving with `localStorage`
-- 📱 Optimized for touch screens and iPad
+- 📱 Compact, responsive dashboard for **2–6 players**, optimized for iPad
 - 🏠 Installable with **Add to Home Screen**
 - 🌐 Works offline after the first successful load
 - 🚫 No account, database, or server required
