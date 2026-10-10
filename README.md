@@ -21,6 +21,7 @@ Designed to run smoothly on an iPad, Meeple Score replaces the physical scoring 
 - 💾 Automatic saving with `localStorage`
 - 📱 Compact score-only dashboard for **2–6 players**, with a dedicated multi-player scoring panel
 - 🗺️ Live pseudo-3D score track with moving player markers and lap indicators
+- 🕘 Scrollable recent scoring history inside each player card
 - 🏠 Installable with **Add to Home Screen**
 - 🌐 Works offline after the first successful load
 - 🚫 No account, database, or server required
