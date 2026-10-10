@@ -10,6 +10,7 @@ Designed to run smoothly on an iPad, Meeple Score replaces the physical scoring 
 
 - 👥 Supports **2–6 players**
 - 🎨 Custom player names and colors
+- 👥 Add one score event to **one or multiple players at once**
 - ➕ Quick score buttons: **+1 through +10**; repeated taps accumulate into one pending score before confirmation
 - 🔢 Add any custom score (negative values are still available for corrections)
 - ↩️ Undo the latest score change
@@ -18,7 +19,7 @@ Designed to run smoothly on an iPad, Meeple Score replaces the physical scoring 
 - 📊 Per-player score breakdown by category and goods type
 - 🕘 Score history with scoring category
 - 💾 Automatic saving with `localStorage`
-- 📱 Compact, responsive dashboard for **2–6 players**, optimized for iPad
+- 📱 Compact score-only dashboard for **2–6 players**, with a dedicated multi-player scoring panel
 - 🏠 Installable with **Add to Home Screen**
 - 🌐 Works offline after the first successful load
 - 🚫 No account, database, or server required
