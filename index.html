@@ -364,7 +364,7 @@
           </button>
         </div>
         <div class="quick">
-          ${Array.from({ length: 10 }, (_, i) => i + 1).map(n => `<button class="score-btn ${Number(p.draftScore) === n && String(p.draftScore).trim() !== '' ? 'selected' : ''}" data-delta="${n}" data-id="${p.id}" type="button">+${n}</button>`).join('')}
+          ${Array.from({ length: 10 }, (_, i) => i + 1).map(n => `<button class="score-btn" data-delta="${n}" data-id="${p.id}" type="button">+${n}</button>`).join('')}
         </div>
         <div class="custom-row">
           <input class="custom-input" inputmode="numeric" pattern="-?[0-9]*" value="${escapeHtml(p.draftScore ?? '')}" placeholder="เลือก +1 ถึง +10 หรือกรอกคะแนนเอง" aria-label="คะแนนกำหนดเอง" data-custom-id="${p.id}" />
@@ -426,7 +426,9 @@
     if (btn) {
       const p = state.players.find(x => x.id === btn.dataset.id);
       if (!p) return;
-      p.draftScore = String(btn.dataset.delta);
+      const current = Number(p.draftScore) || 0;
+      const delta = Number(btn.dataset.delta);
+      p.draftScore = String(current + delta);
       saveState();
       render();
       return;
@@ -449,10 +451,7 @@
     if (!p) return;
     p.draftScore = e.target.value;
     saveState();
-    const card = e.target.closest('.player-card');
-    card?.querySelectorAll('[data-delta]').forEach(btn => {
-      btn.classList.toggle('selected', Number(e.target.value) === Number(btn.dataset.delta) && e.target.value.trim() !== '');
-    });
+    // The input shows the accumulated pending score. Quick buttons add to this value.
   });
 
   scoreGrid.addEventListener('keydown', (e) => {
