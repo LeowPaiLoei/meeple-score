@@ -225,48 +225,57 @@
     @media (orientation:landscape) and (min-width:900px) {
       .app {
         display:grid;
-        grid-template-columns:minmax(0,1.72fr) minmax(360px,.88fr);
+        grid-template-columns:1fr;
         grid-template-areas:
-          "header header"
-          "players track"
-          "action action"
-          "footer footer";
-        column-gap:12px;
-        row-gap:9px;
+          "header"
+          "players"
+          "action"
+          "track"
+          "footer";
+        row-gap:8px;
         align-items:start;
       }
       header { grid-area:header; margin-bottom:0; }
       .score-grid { grid-area:players; gap:9px; }
       .score-grid.players-3,.score-grid.players-5,.score-grid.players-6 { grid-template-columns:repeat(3,minmax(0,1fr)); }
       .score-grid.players-2,.score-grid.players-4 { grid-template-columns:repeat(2,minmax(0,1fr)); }
+
+      .player-card { min-height:132px; padding:10px 12px 10px 17px; }
+      .player-top { gap:7px; }
+      .player-name { font-size:17px; }
+      .rank { font-size:10px; }
+      .player-body { gap:12px; margin-top:5px; }
+      .score { min-width:72px; font-size:54px; }
+      .mini-history-scroll { max-height:44px; }
+      .mini-history-row { font-size:9.5px; }
+
+      .dashboard-action { grid-area:action; margin:1px 0 0; }
+      .add-score-main { min-height:48px; padding:0 30px; font-size:17px; }
+
       .track-section {
         grid-area:track;
         margin-top:0;
-        min-height:260px;
-        height:100%;
-        padding:8px 9px 8px;
-        display:flex;
-        flex-direction:column;
+        padding:8px 12px 9px;
       }
-      .track-header { margin-bottom:0; }
+      .track-header { margin-bottom:1px; align-items:center; }
+      .track-header h2 { font-size:15px; }
       .track-header p { display:none; }
-      .track-legend { max-width:68%; gap:3px; }
-      .track-chip { min-height:23px; padding:0 6px; font-size:9px; }
-      .track-stage { flex:1; min-height:0; padding:0 2px 2px; display:flex; align-items:center; }
-      .track-board { width:100%; transform:rotateX(5deg) rotateZ(-.25deg); filter:drop-shadow(0 8px 7px rgba(55,43,25,.18)); }
-      .track-board svg { width:100%; height:auto; max-height:300px; }
-      .dashboard-action { grid-area:action; margin:0; }
-      .add-score-main { min-height:50px; font-size:17px; }
+      .track-legend { max-width:72%; gap:4px; }
+      .track-chip { min-height:23px; padding:0 7px; font-size:9px; }
+      .track-stage { padding:0 54px 3px; }
+      .track-board {
+        width:100%;
+        transform:rotateX(5deg) rotateZ(-.2deg);
+        filter:drop-shadow(0 8px 7px rgba(55,43,25,.18));
+      }
+      .track-board svg {
+        width:100%;
+        height:auto;
+        max-height:292px;
+      }
+
       .footer-bar { grid-area:footer; }
       .summary-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
-      .player-card { min-height:145px; padding:11px 12px 10px 17px; }
-      .player-top { gap:7px; }
-      .player-name { font-size:16px; }
-      .rank { font-size:10px; }
-      .player-body { gap:9px; margin-top:6px; }
-      .score { min-width:68px; font-size:52px; }
-      .mini-history-scroll { max-height:44px; }
-      .mini-history-row { font-size:9px; }
     }
     @media (max-width:720px) {
       .brand p { display:none; }
