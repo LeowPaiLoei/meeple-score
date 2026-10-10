@@ -7,169 +7,176 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Meeple Score" />
-  <meta name="description" content="Offline scoreboard for tabletop games, designed for Carcassonne sessions." />
+  <meta name="description" content="Touch-friendly Carcassonne scoreboard for iPad." />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="apple-touch-icon" href="icons/icon-180.png" />
   <link rel="icon" href="icons/favicon.svg" type="image/svg+xml" />
   <title>Meeple Score</title>
   <style>
     :root {
-      --paper: #f5ecd3;
-      --paper-2: #eadbb7;
-      --ink: #2a251f;
-      --muted: #756b5c;
-      --card: rgba(255,255,255,.78);
-      --line: rgba(57,45,31,.16);
-      --shadow: 0 10px 28px rgba(69,50,22,.12);
-      --radius: 24px;
-      --tap: 54px;
+      --paper:#f5ecd3;
+      --ink:#2a251f;
+      --muted:#756b5c;
+      --line:rgba(57,45,31,.16);
+      --card:rgba(255,255,255,.80);
+      --green:#2f553f;
+      --shadow:0 10px 28px rgba(69,50,22,.12);
     }
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html, body { margin: 0; min-height: 100%; background: var(--paper); color: var(--ink); font-family: ui-rounded, "SF Pro Rounded", "SF Pro Display", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    html,body { margin:0; min-height:100%; background:var(--paper); color:var(--ink); font-family:ui-rounded,"SF Pro Rounded","SF Pro Display",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
     body {
-      min-height: 100vh;
+      min-height:100vh;
+      padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));
       background:
-        radial-gradient(circle at 15% 0%, rgba(255,255,255,.7), transparent 28%),
-        linear-gradient(135deg, #f7f0dc 0%, #efe1bd 52%, #e8d2a3 100%);
-      padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(22px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+        radial-gradient(circle at 12% 0%,rgba(255,255,255,.72),transparent 28%),
+        linear-gradient(135deg,#f7f0dc 0%,#efe1bd 52%,#e8d2a3 100%);
     }
-    button, input, select { font: inherit; }
-    button { touch-action: manipulation; }
-    .app { width: min(1200px, 100%); margin: 0 auto; }
-    header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
-    .brand { display:flex; align-items:center; gap:12px; min-width:0; }
-    .logo { width:48px; height:48px; border-radius:15px; background:#2f553f; color:white; display:grid; place-items:center; box-shadow: var(--shadow); font-size:26px; user-select:none; }
-    .brand h1 { margin:0; font-size:clamp(22px, 3.2vw, 34px); line-height:1; letter-spacing:-.02em; }
-    .brand p { margin:5px 0 0; color:var(--muted); font-size:13px; }
-    .top-actions { display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
-    .btn { border:1px solid var(--line); background:rgba(255,255,255,.7); color:var(--ink); min-height:46px; border-radius:14px; padding:0 14px; font-weight:750; cursor:pointer; box-shadow:0 3px 10px rgba(50,35,16,.05); }
+    button,input,select { font:inherit; }
+    button { touch-action:manipulation; cursor:pointer; }
+    .app { width:min(1180px,100%); margin:0 auto; }
+    header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
+    .brand { display:flex; align-items:center; gap:10px; min-width:0; }
+    .logo { width:44px; height:44px; border-radius:14px; background:var(--green); color:#fff; display:grid; place-items:center; font-size:23px; box-shadow:var(--shadow); }
+    .brand h1 { margin:0; font-size:clamp(22px,3vw,32px); line-height:1; letter-spacing:-.025em; }
+    .brand p { margin:4px 0 0; color:var(--muted); font-size:12px; }
+    .top-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:7px; }
+    .btn { border:1px solid var(--line); background:rgba(255,255,255,.76); color:var(--ink); min-height:42px; border-radius:13px; padding:0 12px; font-weight:800; box-shadow:0 3px 10px rgba(50,35,16,.05); }
     .btn:active { transform:translateY(1px) scale(.99); }
-    .btn.primary { background:#2f553f; color:#fff; border-color:#2f553f; }
+    .btn.primary { background:var(--green); color:#fff; border-color:var(--green); }
     .btn.danger { color:#8d2d2d; }
-    .score-grid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:14px; }
-    .player-card { position:relative; overflow:hidden; border:1px solid var(--line); background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:18px; min-height:250px; }
+
+    .score-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:11px; }
+    .player-card {
+      --player:#3568b8;
+      position:relative;
+      overflow:hidden;
+      min-height:142px;
+      border:1px solid var(--line);
+      background:var(--card);
+      border-radius:20px;
+      padding:14px 15px 13px 19px;
+      box-shadow:var(--shadow);
+    }
     .player-card::before { content:""; position:absolute; inset:0 auto 0 0; width:8px; background:var(--player); }
-    .player-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
-    .player-id { min-width:0; display:flex; align-items:center; gap:10px; }
-    .meeple-dot { width:18px; height:18px; border-radius:6px 6px 5px 5px; background:var(--player); box-shadow: inset 0 0 0 2px rgba(0,0,0,.08); flex:0 0 auto; }
-    .player-name { border:0; background:transparent; padding:4px 0; min-width:0; width:100%; font-weight:850; color:var(--ink); font-size:clamp(18px, 2.4vw, 24px); outline:none; border-bottom:2px solid transparent; }
+    .player-top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .player-id { display:flex; align-items:center; gap:9px; min-width:0; }
+    .player-dot { width:16px; height:16px; flex:0 0 auto; border-radius:6px; background:var(--player); box-shadow:inset 0 0 0 2px rgba(0,0,0,.08); }
+    .player-name { border:0; background:transparent; width:100%; min-width:0; padding:2px 0; outline:none; font-size:18px; font-weight:900; color:var(--ink); border-bottom:2px solid transparent; }
     .player-name:focus { border-bottom-color:var(--player); }
-    .score { font-size:clamp(54px, 9vw, 88px); font-weight:950; letter-spacing:-.055em; line-height:.95; margin:12px 0 16px; font-variant-numeric:tabular-nums; }
-    .quick { display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:8px; }
-    .score-btn { min-height:var(--tap); border-radius:15px; border:1px solid rgba(0,0,0,.10); background:#fff; color:var(--ink); font-weight:900; font-size:17px; cursor:pointer; box-shadow:0 3px 8px rgba(60,40,20,.06); }
-    .score-btn:active { transform:scale(.97); background:#f7f7f7; }
-    .score-btn.selected { background:var(--player); color:#fff; border-color:var(--player); box-shadow:0 4px 12px color-mix(in srgb, var(--player) 24%, transparent); }
-    .custom-row { display:flex; gap:8px; margin-top:9px; }
-    .custom-input { width:100%; min-width:0; min-height:48px; border:1px solid var(--line); border-radius:13px; background:rgba(255,255,255,.82); padding:0 12px; font-size:17px; outline:none; }
-    .custom-input:focus { border-color:var(--player); box-shadow:0 0 0 3px color-mix(in srgb, var(--player) 18%, transparent); }
-    .add-custom { min-width:82px; border:0; border-radius:13px; background:var(--player); color:white; font-weight:900; cursor:pointer; }
-    .category-label { margin:12px 0 7px; color:var(--muted); font-size:12px; font-weight:850; letter-spacing:.02em; text-transform:uppercase; }
-    .categories { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; margin-bottom:10px; }
-    .category-btn { min-height:42px; border-radius:12px; border:1px solid var(--line); background:rgba(255,255,255,.74); color:var(--ink); font-size:13px; font-weight:850; cursor:pointer; }
-    .category-btn.active { background:var(--player); color:#fff; border-color:var(--player); box-shadow:0 3px 10px rgba(0,0,0,.10); }
-    .category-btn:active { transform:scale(.98); }
-    .goods-picker { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:14px; }
-    .goods-choice { min-height:110px; border-radius:18px; border:1px solid var(--line); background:#fff; color:var(--ink); cursor:pointer; font-weight:900; font-size:34px; display:grid; place-items:center; align-content:center; gap:7px; box-shadow:0 4px 12px rgba(60,40,20,.06); }
-    .goods-choice span { font-size:17px; }
-    .goods-choice:active { transform:scale(.97); background:#f7f1e4; }
-    .summary-modal { width:min(1120px,96vw); max-height:92vh; padding:18px; }
-    .summary-modal h2 { font-size:25px; }
-    .summary-modal .hint { margin-bottom:10px; }
-    .summary-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:10px; }
-    .summary-card { border:1px solid var(--line); border-radius:15px; background:#fff; padding:11px 12px; }
-    .summary-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:7px; }
-    .summary-player { display:flex; align-items:center; gap:8px; font-weight:900; font-size:16px; }
-    .summary-total { font-weight:950; font-size:22px; }
-    .summary-rows { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px 12px; }
-    .summary-row { display:flex; align-items:center; justify-content:space-between; gap:7px; color:var(--muted); font-size:13px; line-height:1.25; }
-    .summary-row strong { color:var(--ink); font-variant-numeric:tabular-nums; }
-    .footer-bar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:14px; background:rgba(255,255,255,.52); border:1px solid var(--line); border-radius:18px; padding:10px 12px; color:var(--muted); font-size:13px; }
+    .rank { color:var(--muted); font-size:12px; font-weight:800; white-space:nowrap; }
+    .score { margin:11px 0 0; font-size:clamp(54px,7vw,74px); font-weight:950; line-height:.9; letter-spacing:-.055em; font-variant-numeric:tabular-nums; }
+    .dashboard-action { display:flex; justify-content:center; margin:13px 0 10px; }
+    .add-score-main { min-height:58px; padding:0 28px; border:0; border-radius:18px; background:var(--green); color:#fff; font-weight:950; font-size:18px; box-shadow:0 8px 20px rgba(47,85,63,.20); }
+    .add-score-main:active { transform:scale(.985); }
+    .footer-bar { display:flex; align-items:center; justify-content:space-between; gap:12px; background:rgba(255,255,255,.52); border:1px solid var(--line); border-radius:15px; padding:8px 11px; color:var(--muted); font-size:11px; }
     .save-state { display:flex; align-items:center; gap:7px; }
     .save-dot { width:8px; height:8px; border-radius:50%; background:#4c8a64; }
 
-    .overlay { position:fixed; inset:0; z-index:20; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(41,34,26,.42); backdrop-filter:blur(8px); }
+    .overlay { position:fixed; inset:0; z-index:20; display:none; align-items:center; justify-content:center; padding:16px; background:rgba(41,34,26,.43); backdrop-filter:blur(8px); }
     .overlay.show { display:flex; }
-    .modal { width:min(720px,100%); max-height:min(88vh,900px); overflow:auto; background:#faf5e8; border-radius:28px; padding:22px; box-shadow:0 24px 70px rgba(24,18,10,.28); border:1px solid rgba(255,255,255,.7); }
-    .modal h2 { margin:0 0 5px; font-size:28px; }
-    .modal .hint { margin:0 0 18px; color:var(--muted); }
-    .setup-count { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:16px; }
-    .count-btn { min-height:52px; border-radius:14px; border:1px solid var(--line); background:white; font-weight:900; cursor:pointer; }
-    .count-btn.active { background:#2f553f; color:white; border-color:#2f553f; }
-    .setup-list { display:grid; gap:9px; }
-    .setup-player { display:grid; grid-template-columns:52px 1fr 160px; gap:8px; align-items:center; }
-    .setup-number { width:44px; height:44px; border-radius:13px; display:grid; place-items:center; font-weight:950; background:#eadfca; }
-    .field { min-height:46px; border-radius:12px; border:1px solid var(--line); background:white; padding:0 11px; outline:none; width:100%; }
-    .modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:18px; }
+    .modal { width:min(760px,100%); max-height:92vh; overflow:auto; border:1px solid rgba(255,255,255,.7); border-radius:26px; background:#faf5e8; padding:20px; box-shadow:0 24px 70px rgba(24,18,10,.28); }
+    .modal.wide { width:min(1080px,96vw); }
+    .modal h2 { margin:0 0 5px; font-size:27px; }
+    .hint { margin:0 0 15px; color:var(--muted); font-size:13px; }
+    .modal-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:17px; }
 
-    .history-list { display:grid; gap:8px; margin-top:12px; }
-    .history-item { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 12px; border:1px solid var(--line); border-radius:13px; background:white; }
-    .history-main { display:flex; align-items:center; gap:9px; min-width:0; }
-    .history-color { width:12px; height:12px; border-radius:4px; background:var(--c); flex:0 0 auto; }
-    .history-time { font-size:12px; color:var(--muted); white-space:nowrap; }
-    .empty { text-align:center; padding:28px 10px; color:var(--muted); }
-    .toast { position:fixed; left:50%; bottom:max(22px, env(safe-area-inset-bottom)); transform:translateX(-50%) translateY(14px); background:#2d2924; color:#fff; padding:10px 14px; border-radius:999px; opacity:0; pointer-events:none; transition:.18s ease; z-index:50; font-weight:750; box-shadow:0 12px 28px rgba(0,0,0,.2); }
+    .setup-count { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:15px; }
+    .count-btn { min-height:50px; border-radius:13px; border:1px solid var(--line); background:#fff; font-weight:900; }
+    .count-btn.active { background:var(--green); color:#fff; border-color:var(--green); }
+    .setup-list { display:grid; gap:9px; }
+    .setup-player { display:grid; grid-template-columns:48px 1fr 150px; gap:8px; align-items:center; }
+    .setup-number { width:42px; height:42px; border-radius:12px; display:grid; place-items:center; font-weight:950; background:#eadfca; }
+    .field { min-height:44px; border-radius:11px; border:1px solid var(--line); background:#fff; padding:0 10px; outline:none; width:100%; }
+
+    .score-step { margin-top:14px; }
+    .step-title { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; font-weight:950; }
+    .step-title small { color:var(--muted); font-weight:700; }
+    .recipient-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+    .recipient-btn {
+      --player:#3568b8;
+      position:relative;
+      min-height:58px;
+      border:2px solid transparent;
+      border-radius:15px;
+      background:#fff;
+      color:var(--ink);
+      display:flex;
+      align-items:center;
+      gap:9px;
+      padding:8px 10px;
+      text-align:left;
+      font-weight:900;
+      box-shadow:0 3px 9px rgba(60,40,20,.05);
+    }
+    .recipient-btn .dot { width:15px; height:15px; border-radius:5px; background:var(--player); flex:0 0 auto; }
+    .recipient-btn .check { margin-left:auto; width:23px; height:23px; border:1px solid var(--line); border-radius:8px; display:grid; place-items:center; color:transparent; background:#f8f4e9; font-size:14px; }
+    .recipient-btn.selected { border-color:var(--player); background:color-mix(in srgb,var(--player) 9%,white); }
+    .recipient-btn.selected .check { background:var(--player); border-color:var(--player); color:#fff; }
+
+    .category-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:7px; }
+    .category-btn { min-height:45px; border:1px solid var(--line); border-radius:12px; background:#fff; font-size:12px; font-weight:900; padding:4px; }
+    .category-btn.active { background:var(--green); color:#fff; border-color:var(--green); }
+    .goods-grid { display:none; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; margin-top:7px; }
+    .goods-grid.show { display:grid; }
+    .goods-btn { min-height:42px; border:1px solid var(--line); border-radius:12px; background:#fff; font-weight:900; }
+    .goods-btn.active { background:#765b32; color:#fff; border-color:#765b32; }
+
+    .points-grid { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:7px; }
+    .point-btn { min-height:48px; border:1px solid rgba(0,0,0,.10); border-radius:13px; background:#fff; font-weight:950; font-size:16px; box-shadow:0 3px 8px rgba(60,40,20,.05); }
+    .point-btn:active { transform:scale(.97); }
+    .pending-row { display:grid; grid-template-columns:1fr auto; gap:8px; margin-top:8px; }
+    .pending-input { min-height:48px; border:1px solid var(--line); border-radius:13px; background:#fff; padding:0 12px; font-size:17px; font-weight:900; outline:none; }
+    .clear-pending { min-width:76px; border:1px solid var(--line); border-radius:13px; background:#fff; color:var(--muted); font-weight:850; }
+    .preview {
+      margin-top:13px;
+      padding:11px 12px;
+      border-radius:14px;
+      background:#efe6cf;
+      color:#5f5548;
+      font-size:13px;
+      line-height:1.5;
+    }
+    .preview strong { color:var(--ink); }
+
+    .history-list { display:grid; gap:8px; margin-top:10px; }
+    .history-item { border:1px solid var(--line); border-radius:14px; background:#fff; padding:10px 11px; }
+    .history-head { display:flex; justify-content:space-between; gap:10px; align-items:center; }
+    .history-title { font-weight:950; }
+    .history-time { color:var(--muted); font-size:11px; white-space:nowrap; }
+    .history-players { margin-top:5px; color:var(--muted); font-size:12px; }
+    .mini-dot { display:inline-block; width:10px; height:10px; border-radius:4px; margin-right:4px; vertical-align:-1px; }
+    .empty { text-align:center; color:var(--muted); padding:28px 10px; }
+
+    .summary-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; margin-top:10px; }
+    .summary-card { border:1px solid var(--line); border-radius:15px; background:#fff; padding:11px 12px; }
+    .summary-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:7px; }
+    .summary-player { display:flex; align-items:center; gap:8px; font-size:16px; font-weight:950; }
+    .summary-total { font-size:22px; font-weight:950; }
+    .summary-rows { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px 12px; }
+    .summary-row { display:flex; align-items:center; justify-content:space-between; gap:7px; color:var(--muted); font-size:12px; }
+    .summary-row strong { color:var(--ink); }
+
+    .toast { position:fixed; z-index:50; left:50%; bottom:max(22px,env(safe-area-inset-bottom)); transform:translateX(-50%) translateY(14px); opacity:0; pointer-events:none; transition:.18s ease; border-radius:999px; background:#2d2924; color:#fff; padding:10px 14px; font-weight:800; box-shadow:0 12px 28px rgba(0,0,0,.2); }
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
-    @media (max-width: 760px) {
-      body { padding:12px; }
-      header { align-items:flex-start; }
+    @media (orientation:landscape) and (min-width:900px) {
+      .score-grid.players-3,.score-grid.players-5,.score-grid.players-6 { grid-template-columns:repeat(3,minmax(0,1fr)); }
+      .score-grid.players-2,.score-grid.players-4 { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .summary-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+      .player-card { min-height:126px; }
+      .score { font-size:58px; }
+    }
+    @media (max-width:720px) {
       .brand p { display:none; }
-      .top-actions .btn { padding:0 10px; }
-      .score-grid { grid-template-columns:1fr; }
-      .player-card { min-height:0; }
-      .quick { grid-template-columns:repeat(5,1fr); }
-      .setup-player { grid-template-columns:44px 1fr; }
+      .top-actions .btn { padding:0 9px; }
+      .recipient-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .category-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+      .setup-player { grid-template-columns:42px 1fr; }
       .setup-player select { grid-column:2; }
     }
-    /* Consistent compact layout for 2–6 players, optimized for iPad */
-    body.compact-mode {
-      padding-top:max(10px, env(safe-area-inset-top));
-      padding-bottom:max(10px, env(safe-area-inset-bottom));
-    }
-    body.compact-mode header { margin-bottom:8px; }
-    body.compact-mode .logo { width:42px; height:42px; border-radius:13px; font-size:22px; }
-    body.compact-mode .brand h1 { font-size:clamp(22px,2.5vw,30px); }
-    body.compact-mode .brand p { margin-top:3px; font-size:11px; }
-    body.compact-mode .top-actions { gap:6px; }
-    body.compact-mode .top-actions .btn { min-height:40px; border-radius:12px; padding:0 11px; font-size:14px; }
-    body.compact-mode .score-grid { gap:10px; }
-    body.compact-mode .player-card { padding:11px 12px 12px 16px; border-radius:19px; min-height:0; }
-    body.compact-mode .player-card::before { width:7px; }
-    body.compact-mode .player-head { margin-bottom:1px; }
-    body.compact-mode .meeple-dot { width:15px; height:15px; }
-    body.compact-mode .player-name { font-size:18px; padding:2px 0; }
-    body.compact-mode .score { font-size:56px; line-height:.9; margin:4px 0 7px; }
-    body.compact-mode .category-label { margin:4px 0 4px; font-size:10px; }
-    body.compact-mode .categories { grid-template-columns:repeat(5,minmax(0,1fr)); gap:4px; margin-bottom:6px; }
-    body.compact-mode .category-btn { min-height:36px; border-radius:10px; padding:2px 3px; font-size:10.5px; line-height:1.15; }
-    body.compact-mode .quick { grid-template-columns:repeat(5,minmax(0,1fr)); gap:5px; }
-    body.compact-mode .score-btn { min-height:39px; border-radius:11px; font-size:15px; }
-    body.compact-mode .custom-row { gap:6px; margin-top:6px; }
-    body.compact-mode .custom-input { min-height:39px; border-radius:10px; padding:0 9px; font-size:13px; }
-    body.compact-mode .add-custom { min-width:62px; border-radius:10px; font-size:14px; }
-    body.compact-mode .footer-bar { margin-top:8px; padding:7px 10px; border-radius:14px; font-size:11px; }
-
-    @media (max-width: 620px) {
+    @media (max-width:560px) {
+      .score-grid { grid-template-columns:1fr; }
       .summary-grid { grid-template-columns:1fr; }
-    }
-    @media (orientation:landscape) and (min-width:900px) {
-      .summary-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
-      .summary-modal { width:min(1180px,96vw); }
-
-      .score-grid.players-3, .score-grid.players-5, .score-grid.players-6 { grid-template-columns:repeat(3,minmax(0,1fr)); }
-      .player-card { padding:16px; }
-      .quick { gap:6px; }
-      .score-btn { min-height:50px; }
-
-      body.compact-mode .player-card { padding:10px 11px 11px 15px; }
-      body.compact-mode .score { font-size:52px; margin:2px 0 5px; }
-      body.compact-mode .categories { gap:3px; margin-bottom:5px; }
-      body.compact-mode .category-btn { min-height:33px; font-size:9.8px; }
-      body.compact-mode .quick { gap:4px; }
-      body.compact-mode .score-btn { min-height:36px; font-size:14px; }
-      body.compact-mode .custom-row { margin-top:5px; }
-      body.compact-mode .custom-input { min-height:36px; }
-      body.compact-mode .add-custom { min-height:36px; }
     }
   </style>
 </head>
@@ -180,7 +187,7 @@
         <div class="logo" aria-hidden="true">♜</div>
         <div>
           <h1>Meeple Score</h1>
-          <p>กระดานคะแนนสำหรับโต๊ะเกม • เก็บข้อมูลไว้ในเครื่องนี้</p>
+          <p>เลือกผู้เล่น → เลือกประเภท → เลือกคะแนน → ยืนยันครั้งเดียว</p>
         </div>
       </div>
       <div class="top-actions">
@@ -192,6 +199,10 @@
     </header>
 
     <section class="score-grid" id="scoreGrid" aria-live="polite"></section>
+
+    <div class="dashboard-action">
+      <button class="add-score-main" id="openScoreBtn" type="button">＋ เพิ่มคะแนน</button>
+    </div>
 
     <div class="footer-bar">
       <div class="save-state"><span class="save-dot"></span><span id="saveLabel">บันทึกอัตโนมัติแล้ว</span></div>
@@ -211,6 +222,40 @@
     </div>
   </div>
 
+  <div class="overlay" id="scoreOverlay" role="dialog" aria-modal="true" aria-labelledby="scoreTitle">
+    <div class="modal wide">
+      <h2 id="scoreTitle">เพิ่มคะแนน</h2>
+      <p class="hint">หนึ่งรายการสามารถให้คะแนนผู้เล่นหลายคนพร้อมกันได้</p>
+
+      <section class="score-step">
+        <div class="step-title"><span>1. ใครได้คะแนน?</span><small id="selectedCount">ยังไม่ได้เลือกผู้เล่น</small></div>
+        <div class="recipient-grid" id="recipientGrid"></div>
+      </section>
+
+      <section class="score-step">
+        <div class="step-title"><span>2. ประเภทคะแนน</span></div>
+        <div class="category-grid" id="categoryGrid"></div>
+        <div class="goods-grid" id="goodsGrid"></div>
+      </section>
+
+      <section class="score-step">
+        <div class="step-title"><span>3. คะแนน</span><small>กดซ้ำเพื่อสะสมได้</small></div>
+        <div class="points-grid" id="pointsGrid"></div>
+        <div class="pending-row">
+          <input class="pending-input" id="pendingInput" inputmode="numeric" pattern="-?[0-9]*" placeholder="คะแนนที่กำลังจะเพิ่ม เช่น 12" aria-label="คะแนนที่จะเพิ่ม" />
+          <button class="clear-pending" id="clearPendingBtn" type="button">ล้าง</button>
+        </div>
+      </section>
+
+      <div class="preview" id="scorePreview">เลือกผู้เล่น ประเภท และคะแนนก่อน</div>
+
+      <div class="modal-actions">
+        <button class="btn" id="closeScoreBtn" type="button">ยกเลิก</button>
+        <button class="btn primary" id="confirmScoreBtn" type="button">เพิ่มคะแนน</button>
+      </div>
+    </div>
+  </div>
+
   <div class="overlay" id="historyOverlay" role="dialog" aria-modal="true" aria-labelledby="historyTitle">
     <div class="modal">
       <h2 id="historyTitle">ประวัติคะแนน</h2>
@@ -223,9 +268,9 @@
   </div>
 
   <div class="overlay" id="summaryOverlay" role="dialog" aria-modal="true" aria-labelledby="summaryTitle">
-    <div class="modal summary-modal">
+    <div class="modal wide">
       <h2 id="summaryTitle">สรุปคะแนนตามประเภท</h2>
-      <p class="hint">ดูว่าผู้เล่นแต่ละคนได้คะแนนจากส่วนไหนของเกมบ้าง</p>
+      <p class="hint">คะแนนรวมและรายละเอียดของผู้เล่นแต่ละคน</p>
       <div class="summary-grid" id="summaryGrid"></div>
       <div class="modal-actions">
         <button class="btn" id="closeSummaryBtn" type="button">ปิด</button>
@@ -233,388 +278,548 @@
     </div>
   </div>
 
-  <div class="overlay" id="goodsOverlay" role="dialog" aria-modal="true" aria-labelledby="goodsTitle">
-    <div class="modal" style="width:min(520px,100%)">
-      <h2 id="goodsTitle">เลือกสินค้า</h2>
-      <p class="hint">เลือกชนิดสินค้าสำหรับ <strong id="goodsPlayerName"></strong></p>
-      <div class="goods-picker">
-        <button class="goods-choice" data-goods-type="goods_chicken" type="button">🐔<span>ไก่</span></button>
-        <button class="goods-choice" data-goods-type="goods_cloth" type="button">🧵<span>ผ้า</span></button>
-        <button class="goods-choice" data-goods-type="goods_rice" type="button">🌾<span>ข้าว</span></button>
-      </div>
-      <div class="modal-actions">
-        <button class="btn" id="closeGoodsBtn" type="button">ยกเลิก</button>
-      </div>
-    </div>
-  </div>
-
   <div class="toast" id="toast"></div>
 
 <script>
-(() => {
-  const STORAGE_KEY = 'meeple-score-v1';
-  const palette = [
-    { name: 'แดง', value: '#c73b3b' },
-    { name: 'น้ำเงิน', value: '#3568b8' },
-    { name: 'เขียว', value: '#3e8055' },
-    { name: 'เหลือง', value: '#c69c22' },
-    { name: 'ดำ', value: '#383838' },
-    { name: 'ชมพู', value: '#b85f86' },
-    { name: 'ม่วง', value: '#7255a3' },
-    { name: 'ส้ม', value: '#c66b2d' }
+(function () {
+  var STORAGE_KEY = 'meeple-score-v1';
+
+  var palette = [
+    { name:'แดง', value:'#c73b3b' },
+    { name:'น้ำเงิน', value:'#3568b8' },
+    { name:'เขียว', value:'#3e8055' },
+    { name:'เหลือง', value:'#c69c22' },
+    { name:'ดำ', value:'#383838' },
+    { name:'ชมพู', value:'#b85f86' },
+    { name:'ม่วง', value:'#7255a3' },
+    { name:'ส้ม', value:'#c66b2d' }
   ];
 
-  const baseCategories = [
+  var baseCategories = [
     { id:'city', label:'🏰 เมือง' },
     { id:'road', label:'🛣️ ถนน' },
     { id:'monastery', label:'⛪ โบสถ์' },
     { id:'field', label:'🌾 นอนหญ้า' }
   ];
 
-  const goodsTypes = [
-    { id:'goods_chicken', label:'🐔 ไก่', short:'ไก่' },
-    { id:'goods_cloth', label:'🧵 ผ้า', short:'ผ้า' },
-    { id:'goods_rice', label:'🌾 ข้าว', short:'ข้าว' }
+  var goodsTypes = [
+    { id:'goods_chicken', label:'🐔 ไก่' },
+    { id:'goods_cloth', label:'🧵 ผ้า' },
+    { id:'goods_rice', label:'🌾 ข้าว' }
   ];
 
-  const scoringCategories = [...baseCategories, ...goodsTypes];
-  const isGoodsCategory = id => goodsTypes.some(g => g.id === id);
-  const categoryLabel = id => scoringCategories.find(c => c.id === id)?.label
-    || (id === 'goods_legacy' ? '🎁 สินค้า (ไม่ระบุชนิด)' : '🕘 ไม่ระบุ (ข้อมูลเก่า)');
+  var scoringCategories = baseCategories.concat(goodsTypes);
 
-  const defaultState = () => ({
-    started: false,
-    playerCount: 4,
-    players: Array.from({ length: 4 }, (_, i) => ({
-      id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + i),
-      name: `ผู้เล่น ${i + 1}`,
-      color: palette[i].value,
-      score: 0,
-      category: 'city',
-      draftScore: ''
-    })),
-    history: [],
-    createdAt: Date.now()
-  });
+  function uid() {
+    return (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2));
+  }
 
-  let state = loadState() || defaultState();
-  state.players = (state.players || []).map(p => ({
-    ...p,
-    category: scoringCategories.some(cat => cat.id === p.category) ? p.category : 'city',
-    draftScore: p.draftScore ?? ''
-  }));
-  state.history = (state.history || []).map(h => ({
-    ...h,
-    category: scoringCategories.some(cat => cat.id === h.category)
-      ? h.category
-      : ((h.category === 'goods' || h.category === 'expansion') ? 'goods_legacy' : 'legacy')
-  }));
-  let setupCount = state.playerCount || 4;
-
-  const el = id => document.getElementById(id);
-  const scoreGrid = el('scoreGrid');
-  const setupOverlay = el('setupOverlay');
-  const historyOverlay = el('historyOverlay');
-  const summaryOverlay = el('summaryOverlay');
-  const goodsOverlay = el('goodsOverlay');
-  let pendingGoodsPlayerId = null;
+  function defaultState() {
+    return {
+      started:false,
+      playerCount:4,
+      players:Array.from({length:4},function(_,i){
+        return { id:uid(), name:'ผู้เล่น '+(i+1), color:palette[i].value, score:0 };
+      }),
+      history:[],
+      createdAt:Date.now()
+    };
+  }
 
   function loadState() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      var raw = localStorage.getItem(STORAGE_KEY);
       return raw ? JSON.parse(raw) : null;
-    } catch (_) { return null; }
+    } catch (_) {
+      return null;
+    }
   }
+
+  var state = loadState() || defaultState();
+  state.players = (state.players || []).map(function(p){
+    return {
+      id:p.id || uid(),
+      name:p.name || 'ผู้เล่น',
+      color:p.color || '#3568b8',
+      score:Number(p.score) || 0
+    };
+  });
+  state.history = Array.isArray(state.history) ? state.history : [];
+  var setupCount = state.playerCount || state.players.length || 4;
+
+  var draft = {
+    playerIds:[],
+    category:'city',
+    points:''
+  };
+
+  function el(id) { return document.getElementById(id); }
+  var scoreGrid = el('scoreGrid');
+  var setupOverlay = el('setupOverlay');
+  var scoreOverlay = el('scoreOverlay');
+  var historyOverlay = el('historyOverlay');
+  var summaryOverlay = el('summaryOverlay');
 
   function saveState() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     el('saveLabel').textContent = 'บันทึกอัตโนมัติแล้ว';
   }
 
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>'"]/g,function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c];
+    });
+  }
+
+  function signed(n) { return n > 0 ? '+'+n : String(n); }
+
   function showToast(text) {
-    const t = el('toast');
+    var t = el('toast');
     t.textContent = text;
     t.classList.add('show');
     clearTimeout(showToast.timer);
-    showToast.timer = setTimeout(() => t.classList.remove('show'), 1500);
+    showToast.timer = setTimeout(function(){ t.classList.remove('show'); },1600);
   }
 
-  function render() {
-    document.body.classList.toggle('compact-mode', state.players.length >= 2 && state.players.length <= 6);
-    scoreGrid.className = `score-grid players-${state.players.length}`;
+  function categoryLabel(id) {
+    var found = scoringCategories.find(function(c){ return c.id === id; });
+    if (found) return found.label;
+    if (id === 'goods_legacy' || id === 'goods' || id === 'expansion') return '🎁 สินค้า (เดิม)';
+    return '🕘 ไม่ระบุ (ข้อมูลเก่า)';
+  }
+
+  function renderDashboard() {
+    scoreGrid.className = 'score-grid players-' + state.players.length;
     scoreGrid.innerHTML = '';
 
-    state.players.forEach((p) => {
-      const card = document.createElement('article');
+    var ranked = state.players.slice().sort(function(a,b){ return b.score-a.score; });
+    var rankMap = {};
+    ranked.forEach(function(p,i){ rankMap[p.id] = i+1; });
+
+    state.players.forEach(function(p){
+      var card = document.createElement('article');
       card.className = 'player-card';
-      card.style.setProperty('--player', p.color);
-      card.innerHTML = `
-        <div class="player-head">
-          <div class="player-id">
-            <span class="meeple-dot" aria-hidden="true"></span>
-            <input class="player-name" aria-label="ชื่อผู้เล่น" value="${escapeHtml(p.name)}" data-name-id="${p.id}" maxlength="24" />
-          </div>
-        </div>
-        <div class="score">${p.score}</div>
-        <div class="category-label">ประเภทคะแนน</div>
-        <div class="categories">
-          ${baseCategories.map(cat => `<button class="category-btn ${(p.category || 'city') === cat.id ? 'active' : ''}" data-category="${cat.id}" data-id="${p.id}" type="button">${cat.label}</button>`).join('')}
-          <button class="category-btn ${isGoodsCategory(p.category) ? 'active' : ''}" data-goods-picker="${p.id}" type="button">
-            🎁 สินค้า${isGoodsCategory(p.category) ? ` • ${goodsTypes.find(g => g.id === p.category)?.short || ''}` : ''}
-          </button>
-        </div>
-        <div class="quick">
-          ${Array.from({ length: 10 }, (_, i) => i + 1).map(n => `<button class="score-btn" data-delta="${n}" data-id="${p.id}" type="button">+${n}</button>`).join('')}
-        </div>
-        <div class="custom-row">
-          <input class="custom-input" inputmode="numeric" pattern="-?[0-9]*" value="${escapeHtml(p.draftScore ?? '')}" placeholder="เลือก +1 ถึง +10 หรือกรอกคะแนนเอง" aria-label="คะแนนกำหนดเอง" data-custom-id="${p.id}" />
-          <button class="add-custom" data-custom-add="${p.id}" type="button">เพิ่ม</button>
-        </div>`;
+      card.style.setProperty('--player',p.color);
+      card.innerHTML =
+        '<div class="player-top">' +
+          '<div class="player-id">' +
+            '<span class="player-dot" aria-hidden="true"></span>' +
+            '<input class="player-name" data-name-id="'+p.id+'" value="'+escapeHtml(p.name)+'" maxlength="24" aria-label="ชื่อผู้เล่น" />' +
+          '</div>' +
+          '<span class="rank">อันดับ '+rankMap[p.id]+'</span>' +
+        '</div>' +
+        '<div class="score">'+p.score+'</div>';
       scoreGrid.appendChild(card);
     });
 
-    const start = new Date(state.createdAt || Date.now());
-    el('gameInfo').textContent = `${state.players.length} ผู้เล่น • เริ่ม ${start.toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})}`;
+    var start = new Date(state.createdAt || Date.now());
+    el('gameInfo').textContent = state.players.length+' ผู้เล่น • เริ่ม '+start.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
   }
 
-  function addScore(id, delta) {
-    const p = state.players.find(x => x.id === id);
-    if (!p || !Number.isFinite(delta) || delta === 0) return;
-    p.score += delta;
-    p.draftScore = '';
-    const category = p.category || 'legacy';
-    state.history.push({ id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), playerId:id, name:p.name, color:p.color, category, delta, after:p.score, at:Date.now() });
-    if (state.history.length > 200) state.history = state.history.slice(-200);
+  scoreGrid.addEventListener('change',function(e){
+    if (!e.target.matches('[data-name-id]')) return;
+    var p = state.players.find(function(x){ return x.id === e.target.dataset.nameId; });
+    if (!p) return;
+    p.name = e.target.value.trim() || 'ผู้เล่น';
+    state.history.forEach(function(h){
+      if (h.playerId === p.id) h.name = p.name;
+      if (Array.isArray(h.players)) {
+        h.players.forEach(function(x){ if (x.id === p.id) x.name = p.name; });
+      }
+    });
     saveState();
-    render();
-    if (navigator.vibrate) navigator.vibrate(12);
+    renderDashboard();
+  });
+
+  function resetDraft() {
+    draft = { playerIds:[], category:'city', points:'' };
+  }
+
+  function openScore() {
+    resetDraft();
+    renderScoreComposer();
+    scoreOverlay.classList.add('show');
+  }
+
+  function closeScore() {
+    scoreOverlay.classList.remove('show');
+    resetDraft();
+  }
+
+  function renderScoreComposer() {
+    var recipients = el('recipientGrid');
+    recipients.innerHTML = '';
+    state.players.forEach(function(p){
+      var selected = draft.playerIds.indexOf(p.id) !== -1;
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'recipient-btn' + (selected ? ' selected' : '');
+      b.style.setProperty('--player',p.color);
+      b.dataset.recipient = p.id;
+      b.innerHTML =
+        '<span class="dot"></span>' +
+        '<span>'+escapeHtml(p.name)+'</span>' +
+        '<span class="check">✓</span>';
+      recipients.appendChild(b);
+    });
+
+    el('selectedCount').textContent = draft.playerIds.length
+      ? 'เลือกแล้ว '+draft.playerIds.length+' คน'
+      : 'ยังไม่ได้เลือกผู้เล่น';
+
+    var categoryGrid = el('categoryGrid');
+    categoryGrid.innerHTML = '';
+    baseCategories.forEach(function(c){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'category-btn' + (draft.category === c.id ? ' active' : '');
+      b.dataset.category = c.id;
+      b.textContent = c.label;
+      categoryGrid.appendChild(b);
+    });
+    var goods = document.createElement('button');
+    goods.type = 'button';
+    goods.className = 'category-btn' + (draft.category.indexOf('goods_') === 0 ? ' active' : '');
+    goods.dataset.category = 'goods';
+    goods.textContent = '🎁 สินค้า';
+    categoryGrid.appendChild(goods);
+
+    var goodsGrid = el('goodsGrid');
+    goodsGrid.className = 'goods-grid' + (draft.category.indexOf('goods_') === 0 || draft.category === 'goods' ? ' show' : '');
+    goodsGrid.innerHTML = '';
+    goodsTypes.forEach(function(g){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'goods-btn' + (draft.category === g.id ? ' active' : '');
+      b.dataset.goods = g.id;
+      b.textContent = g.label;
+      goodsGrid.appendChild(b);
+    });
+
+    var pointsGrid = el('pointsGrid');
+    pointsGrid.innerHTML = '';
+    for (var n=1;n<=10;n++) {
+      var pb = document.createElement('button');
+      pb.type = 'button';
+      pb.className = 'point-btn';
+      pb.dataset.point = String(n);
+      pb.textContent = '+'+n;
+      pointsGrid.appendChild(pb);
+    }
+
+    el('pendingInput').value = draft.points;
+    renderPreview();
+  }
+
+  function renderPreview() {
+    var selectedPlayers = state.players.filter(function(p){ return draft.playerIds.indexOf(p.id) !== -1; });
+    var points = Number(draft.points);
+    var categoryReady = draft.category !== 'goods';
+    var box = el('scorePreview');
+
+    if (!selectedPlayers.length || !draft.points || !Number.isFinite(points) || points === 0 || !categoryReady) {
+      var missing = [];
+      if (!selectedPlayers.length) missing.push('ผู้เล่น');
+      if (draft.category === 'goods') missing.push('ชนิดสินค้า');
+      if (!draft.points || !Number.isFinite(points) || points === 0) missing.push('คะแนน');
+      box.innerHTML = 'ยังขาด: <strong>'+escapeHtml(missing.join(', '))+'</strong>';
+      return;
+    }
+
+    box.innerHTML =
+      '<strong>'+categoryLabel(draft.category)+' '+signed(points)+'</strong><br>' +
+      'ให้กับ '+selectedPlayers.map(function(p){ return escapeHtml(p.name); }).join(', ');
+  }
+
+  el('recipientGrid').addEventListener('click',function(e){
+    var b = e.target.closest('[data-recipient]');
+    if (!b) return;
+    var id = b.dataset.recipient;
+    var at = draft.playerIds.indexOf(id);
+    if (at === -1) draft.playerIds.push(id);
+    else draft.playerIds.splice(at,1);
+    renderScoreComposer();
+  });
+
+  el('categoryGrid').addEventListener('click',function(e){
+    var b = e.target.closest('[data-category]');
+    if (!b) return;
+    draft.category = b.dataset.category;
+    renderScoreComposer();
+  });
+
+  el('goodsGrid').addEventListener('click',function(e){
+    var b = e.target.closest('[data-goods]');
+    if (!b) return;
+    draft.category = b.dataset.goods;
+    renderScoreComposer();
+  });
+
+  el('pointsGrid').addEventListener('click',function(e){
+    var b = e.target.closest('[data-point]');
+    if (!b) return;
+    var current = Number(draft.points) || 0;
+    draft.points = String(current + Number(b.dataset.point));
+    el('pendingInput').value = draft.points;
+    renderPreview();
+  });
+
+  el('pendingInput').addEventListener('input',function(e){
+    draft.points = e.target.value;
+    renderPreview();
+  });
+
+  el('clearPendingBtn').addEventListener('click',function(){
+    draft.points = '';
+    el('pendingInput').value = '';
+    renderPreview();
+  });
+
+  function addScoreEvent() {
+    var points = Number(draft.points);
+    var selectedPlayers = state.players.filter(function(p){ return draft.playerIds.indexOf(p.id) !== -1; });
+
+    if (!selectedPlayers.length) return showToast('เลือกผู้เล่นอย่างน้อย 1 คน');
+    if (draft.category === 'goods') return showToast('เลือกชนิดสินค้าก่อน');
+    if (!draft.points || !Number.isFinite(points) || points === 0) return showToast('เลือกหรือกรอกคะแนนก่อน');
+
+    var snapshots = [];
+    selectedPlayers.forEach(function(p){
+      var before = p.score;
+      p.score += points;
+      snapshots.push({
+        id:p.id,
+        name:p.name,
+        color:p.color,
+        before:before,
+        after:p.score
+      });
+    });
+
+    state.history.push({
+      id:uid(),
+      type:'group_score',
+      players:snapshots,
+      category:draft.category,
+      delta:points,
+      at:Date.now()
+    });
+    if (state.history.length > 250) state.history = state.history.slice(-250);
+
+    saveState();
+    renderDashboard();
+    scoreOverlay.classList.remove('show');
+    showToast('เพิ่ม '+signed(points)+' ให้ '+selectedPlayers.length+' คนแล้ว');
+    resetDraft();
   }
 
   function undo() {
-    const last = state.history.pop();
+    var last = state.history.pop();
     if (!last) return showToast('ยังไม่มีรายการให้ Undo');
-    const p = state.players.find(x => x.id === last.playerId);
-    if (p) p.score -= last.delta;
-    saveState();
-    render();
-    showToast(`ย้อนกลับ ${last.name} ${signed(last.delta)}`);
-  }
 
-  function signed(n) { return n > 0 ? `+${n}` : String(n); }
-  function escapeHtml(s='') { return String(s).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
-
-  scoreGrid.addEventListener('click', (e) => {
-    const goodsBtn = e.target.closest('[data-goods-picker]');
-    if (goodsBtn) {
-      pendingGoodsPlayerId = goodsBtn.dataset.goodsPicker;
-      const p = state.players.find(x => x.id === pendingGoodsPlayerId);
-      el('goodsPlayerName').textContent = p ? p.name : '';
-      goodsOverlay.classList.add('show');
-      return;
-    }
-    const categoryBtn = e.target.closest('[data-category]');
-    if (categoryBtn) {
-      const p = state.players.find(x => x.id === categoryBtn.dataset.id);
-      if (p) {
-        p.category = categoryBtn.dataset.category;
-        saveState();
-        render();
-      }
-      return;
-    }
-    const btn = e.target.closest('[data-delta]');
-    if (btn) {
-      const p = state.players.find(x => x.id === btn.dataset.id);
-      if (!p) return;
-      const current = Number(p.draftScore) || 0;
-      const delta = Number(btn.dataset.delta);
-      p.draftScore = String(current + delta);
+    if (Array.isArray(last.players) && last.players.length) {
+      last.players.forEach(function(snapshot){
+        var p = state.players.find(function(x){ return x.id === snapshot.id; });
+        if (p) p.score -= Number(last.delta) || 0;
+      });
       saveState();
-      render();
+      renderDashboard();
+      showToast('ย้อนกลับรายการล่าสุด '+last.players.length+' คน');
       return;
     }
-    const customBtn = e.target.closest('[data-custom-add]');
-    if (customBtn) {
-      const p = state.players.find(x => x.id === customBtn.dataset.customAdd);
-      const input = scoreGrid.querySelector(`[data-custom-id="${CSS.escape(customBtn.dataset.customAdd)}"]`);
-      const raw = input?.value?.trim() ?? '';
-      const val = Number(raw);
-      if (!p || raw === '' || !Number.isFinite(val) || val === 0) return showToast('เลือกหรือกรอกคะแนนก่อน');
-      p.draftScore = raw;
-      addScore(customBtn.dataset.customAdd, val);
-    }
-  });
 
-  scoreGrid.addEventListener('input', (e) => {
-    if (!e.target.matches('[data-custom-id]')) return;
-    const p = state.players.find(x => x.id === e.target.dataset.customId);
-    if (!p) return;
-    p.draftScore = e.target.value;
+    if (last.playerId) {
+      var oldPlayer = state.players.find(function(x){ return x.id === last.playerId; });
+      if (oldPlayer) oldPlayer.score -= Number(last.delta) || 0;
+      saveState();
+      renderDashboard();
+      showToast('ย้อนกลับ '+(last.name || 'รายการล่าสุด')+' '+signed(Number(last.delta)||0));
+      return;
+    }
+
     saveState();
-    // The input shows the accumulated pending score. Quick buttons add to this value.
-  });
-
-  scoreGrid.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && e.target.matches('[data-custom-id]')) {
-      e.preventDefault();
-      e.target.blur();
-      showToast('กด “เพิ่ม” เพื่อยืนยันคะแนน');
-    }
-  });
-
-  scoreGrid.addEventListener('change', (e) => {
-    if (!e.target.matches('[data-name-id]')) return;
-    const p = state.players.find(x => x.id === e.target.dataset.nameId);
-    if (!p) return;
-    const name = e.target.value.trim() || 'ผู้เล่น';
-    p.name = name;
-    state.history.forEach(h => { if (h.playerId === p.id) h.name = name; });
-    saveState();
-    render();
-  });
-
-  function renderSetup() {
-    const chooser = el('countChooser');
-    chooser.innerHTML = '';
-    [2,3,4,5,6].forEach(n => {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'count-btn' + (n === setupCount ? ' active' : '');
-      b.textContent = n;
-      b.onclick = () => { setupCount = n; renderSetup(); };
-      chooser.appendChild(b);
-    });
-
-    const list = el('setupList');
-    list.innerHTML = '';
-    for (let i = 0; i < setupCount; i++) {
-      const previous = state.players[i];
-      const row = document.createElement('div');
-      row.className = 'setup-player';
-      row.innerHTML = `
-        <div class="setup-number">${i + 1}</div>
-        <input class="field setup-name" value="${escapeHtml(previous?.name || `ผู้เล่น ${i+1}`)}" maxlength="24" aria-label="ชื่อผู้เล่น ${i+1}" />
-        <select class="field setup-color" aria-label="สีผู้เล่น ${i+1}">
-          ${palette.map((c, idx) => `<option value="${c.value}" ${(previous?.color || palette[i % palette.length].value) === c.value ? 'selected' : ''}>${c.name}</option>`).join('')}
-        </select>`;
-      list.appendChild(row);
-    }
+    renderDashboard();
   }
-
-  function openSetup() { setupCount = state.playerCount || state.players.length || 4; renderSetup(); setupOverlay.classList.add('show'); }
-  function closeSetup() { setupOverlay.classList.remove('show'); }
-
-  el('startBtn').addEventListener('click', () => {
-    const rows = [...el('setupList').querySelectorAll('.setup-player')];
-    const used = new Set();
-    const players = rows.map((row, i) => {
-      let color = row.querySelector('.setup-color').value;
-      if (used.has(color)) {
-        color = palette.find(c => !used.has(c.value))?.value || color;
-      }
-      used.add(color);
-      return {
-        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + i),
-        name: row.querySelector('.setup-name').value.trim() || `ผู้เล่น ${i+1}`,
-        color,
-        score: 0,
-        category: 'city',
-        draftScore: ''
-      };
-    });
-    state = { started:true, playerCount:setupCount, players, history:[], createdAt:Date.now() };
-    saveState();
-    closeSetup();
-    render();
-  });
-
-  el('undoBtn').addEventListener('click', undo);
-  el('newGameBtn').addEventListener('click', () => {
-    if (state.started && state.history.length && !confirm('เริ่มเกมใหม่? คะแนนและประวัติเกมปัจจุบันจะถูกล้าง')) return;
-    openSetup();
-  });
 
   function renderHistory() {
-    const list = el('historyList');
+    var list = el('historyList');
     list.innerHTML = '';
     if (!state.history.length) {
-      list.innerHTML = '<div class="empty">ยังไม่มีการเพิ่มหรือลดคะแนน</div>';
+      list.innerHTML = '<div class="empty">ยังไม่มีประวัติคะแนน</div>';
       return;
     }
-    [...state.history].reverse().forEach(h => {
-      const item = document.createElement('div');
+
+    state.history.slice().reverse().forEach(function(h){
+      var item = document.createElement('div');
       item.className = 'history-item';
-      item.innerHTML = `
-        <div class="history-main"><span class="history-color" style="--c:${h.color}"></span><strong>${escapeHtml(h.name)}</strong><span>${categoryLabel(h.category)} • ${signed(h.delta)} → ${h.after}</span></div>
-        <span class="history-time">${new Date(h.at).toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})}</span>`;
+
+      if (Array.isArray(h.players) && h.players.length) {
+        var playerHtml = h.players.map(function(p){
+          return '<span><span class="mini-dot" style="background:'+p.color+'"></span>'+escapeHtml(p.name)+'</span>';
+        }).join(' • ');
+        item.innerHTML =
+          '<div class="history-head">' +
+            '<div class="history-title">'+categoryLabel(h.category)+' '+signed(Number(h.delta)||0)+'</div>' +
+            '<div class="history-time">'+new Date(h.at).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+'</div>' +
+          '</div>' +
+          '<div class="history-players">'+playerHtml+'</div>';
+      } else {
+        item.innerHTML =
+          '<div class="history-head">' +
+            '<div class="history-title">'+categoryLabel(h.category)+' '+signed(Number(h.delta)||0)+'</div>' +
+            '<div class="history-time">'+new Date(h.at).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+'</div>' +
+          '</div>' +
+          '<div class="history-players"><span class="mini-dot" style="background:'+(h.color || '#777')+'"></span>'+escapeHtml(h.name || 'ข้อมูลเก่า')+'</div>';
+      }
       list.appendChild(item);
     });
   }
-  el('historyBtn').addEventListener('click', () => { renderHistory(); historyOverlay.classList.add('show'); });
-  el('closeHistoryBtn').addEventListener('click', () => historyOverlay.classList.remove('show'));
-  historyOverlay.addEventListener('click', e => { if (e.target === historyOverlay) historyOverlay.classList.remove('show'); });
 
   function renderSummary() {
-    const grid = el('summaryGrid');
+    var grid = el('summaryGrid');
     grid.innerHTML = '';
-    state.players.forEach(p => {
-      const totals = Object.fromEntries(scoringCategories.map(cat => [cat.id, 0]));
-      let legacyGoodsTotal = 0;
-      let legacyTotal = 0;
-      state.history.filter(h => h.playerId === p.id).forEach(h => {
-        if (scoringCategories.some(cat => cat.id === h.category)) totals[h.category] += h.delta;
-        else if (h.category === 'goods_legacy') legacyGoodsTotal += h.delta;
-        else legacyTotal += h.delta;
+
+    state.players.forEach(function(p){
+      var totals = {};
+      scoringCategories.forEach(function(c){ totals[c.id] = 0; });
+      var legacyGoods = 0;
+      var legacy = 0;
+
+      state.history.forEach(function(h){
+        var applies = false;
+        if (Array.isArray(h.players)) applies = h.players.some(function(x){ return x.id === p.id; });
+        else applies = h.playerId === p.id;
+        if (!applies) return;
+
+        var delta = Number(h.delta) || 0;
+        if (Object.prototype.hasOwnProperty.call(totals,h.category)) totals[h.category] += delta;
+        else if (h.category === 'goods_legacy' || h.category === 'goods' || h.category === 'expansion') legacyGoods += delta;
+        else legacy += delta;
       });
-      const card = document.createElement('div');
+
+      var card = document.createElement('div');
       card.className = 'summary-card';
-      card.innerHTML = `
-        <div class="summary-head">
-          <div class="summary-player"><span class="history-color" style="--c:${p.color}"></span><span>${escapeHtml(p.name)}</span></div>
-          <div class="summary-total">${p.score}</div>
-        </div>
-        <div class="summary-rows">
-          ${baseCategories.map(cat => `<div class="summary-row"><span>${cat.label}</span><strong>${totals[cat.id]}</strong></div>`).join('')}
-          ${goodsTypes.map(g => `<div class="summary-row"><span>${g.label}</span><strong>${totals[g.id]}</strong></div>`).join('')}
-          ${legacyGoodsTotal !== 0 ? `<div class="summary-row"><span>🎁 สินค้าเดิม (ไม่ระบุชนิด)</span><strong>${legacyGoodsTotal}</strong></div>` : ''}
-          ${legacyTotal !== 0 ? `<div class="summary-row"><span>🕘 คะแนนเดิมก่อนแยกประเภท</span><strong>${legacyTotal}</strong></div>` : ''}
-        </div>`;
+      var rows = '';
+      baseCategories.forEach(function(c){
+        rows += '<div class="summary-row"><span>'+c.label+'</span><strong>'+totals[c.id]+'</strong></div>';
+      });
+      goodsTypes.forEach(function(g){
+        rows += '<div class="summary-row"><span>'+g.label+'</span><strong>'+totals[g.id]+'</strong></div>';
+      });
+      if (legacyGoods) rows += '<div class="summary-row"><span>🎁 สินค้าเดิม</span><strong>'+legacyGoods+'</strong></div>';
+      if (legacy) rows += '<div class="summary-row"><span>🕘 คะแนนเดิม</span><strong>'+legacy+'</strong></div>';
+
+      card.innerHTML =
+        '<div class="summary-head">' +
+          '<div class="summary-player"><span class="mini-dot" style="background:'+p.color+'"></span>'+escapeHtml(p.name)+'</div>' +
+          '<div class="summary-total">'+p.score+'</div>' +
+        '</div>' +
+        '<div class="summary-rows">'+rows+'</div>';
       grid.appendChild(card);
     });
   }
 
-  goodsOverlay.addEventListener('click', e => {
-    const choice = e.target.closest('[data-goods-type]');
-    if (choice && pendingGoodsPlayerId) {
-      const p = state.players.find(x => x.id === pendingGoodsPlayerId);
-      if (p) {
-        p.category = choice.dataset.goodsType;
-        saveState();
-        render();
-      }
-      pendingGoodsPlayerId = null;
-      goodsOverlay.classList.remove('show');
-      return;
-    }
-    if (e.target === goodsOverlay) {
-      pendingGoodsPlayerId = null;
-      goodsOverlay.classList.remove('show');
-    }
-  });
-  el('closeGoodsBtn').addEventListener('click', () => {
-    pendingGoodsPlayerId = null;
-    goodsOverlay.classList.remove('show');
-  });
+  function renderSetup() {
+    var chooser = el('countChooser');
+    chooser.innerHTML = '';
+    [2,3,4,5,6].forEach(function(n){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'count-btn'+(n===setupCount?' active':'');
+      b.textContent = n;
+      b.onclick = function(){ setupCount=n; renderSetup(); };
+      chooser.appendChild(b);
+    });
 
-  el('summaryBtn').addEventListener('click', () => { renderSummary(); summaryOverlay.classList.add('show'); });
-  el('closeSummaryBtn').addEventListener('click', () => summaryOverlay.classList.remove('show'));
-  summaryOverlay.addEventListener('click', e => { if (e.target === summaryOverlay) summaryOverlay.classList.remove('show'); });
+    var list = el('setupList');
+    list.innerHTML = '';
+    for (var i=0;i<setupCount;i++) {
+      var previous = state.players[i];
+      var row = document.createElement('div');
+      row.className = 'setup-player';
 
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+      var options = palette.map(function(c){
+        var chosen = (previous && previous.color ? previous.color : palette[i % palette.length].value) === c.value;
+        return '<option value="'+c.value+'"'+(chosen?' selected':'')+'>'+c.name+'</option>';
+      }).join('');
+
+      row.innerHTML =
+        '<div class="setup-number">'+(i+1)+'</div>' +
+        '<input class="field setup-name" value="'+escapeHtml(previous ? previous.name : 'ผู้เล่น '+(i+1))+'" maxlength="24" aria-label="ชื่อผู้เล่น '+(i+1)+'" />' +
+        '<select class="field setup-color" aria-label="สีผู้เล่น '+(i+1)+'">'+options+'</select>';
+      list.appendChild(row);
+    }
   }
 
-  render();
+  function openSetup() {
+    setupCount = state.playerCount || state.players.length || 4;
+    renderSetup();
+    setupOverlay.classList.add('show');
+  }
+
+  el('startBtn').addEventListener('click',function(){
+    var rows = Array.from(el('setupList').querySelectorAll('.setup-player'));
+    var used = new Set();
+    var players = rows.map(function(row,i){
+      var color = row.querySelector('.setup-color').value;
+      if (used.has(color)) {
+        var free = palette.find(function(c){ return !used.has(c.value); });
+        if (free) color = free.value;
+      }
+      used.add(color);
+      return {
+        id:uid(),
+        name:row.querySelector('.setup-name').value.trim() || 'ผู้เล่น '+(i+1),
+        color:color,
+        score:0
+      };
+    });
+
+    state = {
+      started:true,
+      playerCount:setupCount,
+      players:players,
+      history:[],
+      createdAt:Date.now()
+    };
+    saveState();
+    setupOverlay.classList.remove('show');
+    renderDashboard();
+  });
+
+  el('openScoreBtn').addEventListener('click',openScore);
+  el('closeScoreBtn').addEventListener('click',closeScore);
+  el('confirmScoreBtn').addEventListener('click',addScoreEvent);
+  scoreOverlay.addEventListener('click',function(e){ if (e.target === scoreOverlay) closeScore(); });
+
+  el('undoBtn').addEventListener('click',undo);
+
+  el('historyBtn').addEventListener('click',function(){
+    renderHistory();
+    historyOverlay.classList.add('show');
+  });
+  el('closeHistoryBtn').addEventListener('click',function(){ historyOverlay.classList.remove('show'); });
+  historyOverlay.addEventListener('click',function(e){ if (e.target === historyOverlay) historyOverlay.classList.remove('show'); });
+
+  el('summaryBtn').addEventListener('click',function(){
+    renderSummary();
+    summaryOverlay.classList.add('show');
+  });
+  el('closeSummaryBtn').addEventListener('click',function(){ summaryOverlay.classList.remove('show'); });
+  summaryOverlay.addEventListener('click',function(e){ if (e.target === summaryOverlay) summaryOverlay.classList.remove('show'); });
+
+  el('newGameBtn').addEventListener('click',function(){
+    if (state.started && state.history.length && !confirm('เริ่มเกมใหม่? คะแนนและประวัติเกมปัจจุบันจะถูกล้าง')) return;
+    openSetup();
+  });
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load',function(){
+      navigator.serviceWorker.register('./sw.js').catch(function(){});
+    });
+  }
+
+  renderDashboard();
   if (!state.started) openSetup();
 })();
 </script>
