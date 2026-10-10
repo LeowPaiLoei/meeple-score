@@ -72,6 +72,43 @@
     .save-state { display:flex; align-items:center; gap:7px; }
     .save-dot { width:8px; height:8px; border-radius:50%; background:#4c8a64; }
 
+    .track-section {
+      margin-top:12px;
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:11px 13px 13px;
+      background:rgba(255,255,255,.48);
+      box-shadow:0 8px 24px rgba(69,50,22,.08);
+      overflow:hidden;
+    }
+    .track-header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:4px; }
+    .track-header h2 { margin:0; font-size:17px; letter-spacing:-.01em; }
+    .track-header p { margin:2px 0 0; color:var(--muted); font-size:11px; }
+    .track-legend { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:5px; max-width:62%; }
+    .track-chip {
+      --player:#3568b8;
+      display:flex; align-items:center; gap:5px;
+      min-height:27px; padding:0 8px;
+      border:1px solid var(--line); border-radius:999px;
+      background:rgba(255,255,255,.75);
+      font-size:10px; font-weight:850; color:var(--ink);
+      white-space:nowrap;
+    }
+    .track-chip-dot { width:9px; height:9px; border-radius:4px; background:var(--player); }
+    .track-chip-lap { color:var(--muted); font-weight:800; }
+    .track-stage { perspective:1100px; padding:3px 8px 10px; }
+    .track-board {
+      transform:rotateX(8deg) rotateZ(-.45deg);
+      transform-origin:center center;
+      filter:drop-shadow(0 13px 10px rgba(55,43,25,.20));
+      transition:transform .2s ease;
+    }
+    .track-board svg { display:block; width:100%; height:auto; overflow:visible; }
+    .track-cell-number { font-size:11px; font-weight:900; fill:#4b4a32; text-anchor:middle; dominant-baseline:middle; pointer-events:none; }
+    .track-marker { transition:transform .28s ease; }
+    .track-marker-name { font-size:9px; font-weight:900; fill:#fff; text-anchor:middle; paint-order:stroke; stroke:rgba(0,0,0,.42); stroke-width:2px; }
+    .track-lap-badge { font-size:8px; font-weight:950; fill:#fff; text-anchor:middle; dominant-baseline:middle; }
+
     .overlay { position:fixed; inset:0; z-index:20; display:none; align-items:center; justify-content:center; padding:16px; background:rgba(41,34,26,.43); backdrop-filter:blur(8px); }
     .overlay.show { display:flex; }
     .modal { width:min(760px,100%); max-height:92vh; overflow:auto; border:1px solid rgba(255,255,255,.7); border-radius:26px; background:#faf5e8; padding:20px; box-shadow:0 24px 70px rgba(24,18,10,.28); }
@@ -165,6 +202,8 @@
       .summary-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
       .player-card { min-height:126px; }
       .score { font-size:58px; }
+      .track-section { padding:9px 11px 10px; }
+      .track-stage { padding:0 22px 5px; }
     }
     @media (max-width:720px) {
       .brand p { display:none; }
@@ -173,6 +212,10 @@
       .category-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
       .setup-player { grid-template-columns:42px 1fr; }
       .setup-player select { grid-column:2; }
+      .track-header { align-items:flex-start; }
+      .track-legend { max-width:56%; }
+      .track-board { transform:rotateX(5deg); }
+      .track-stage { padding-left:0; padding-right:0; }
     }
     @media (max-width:560px) {
       .score-grid { grid-template-columns:1fr; }
@@ -199,6 +242,21 @@
     </header>
 
     <section class="score-grid" id="scoreGrid" aria-live="polite"></section>
+
+    <section class="track-section" aria-labelledby="trackTitle">
+      <div class="track-header">
+        <div>
+          <h2 id="trackTitle">🏰 Live Score Track</h2>
+          <p>กระดานคะแนนแบบ 3D • ตัวหมากขยับตามคะแนนจริง</p>
+        </div>
+        <div class="track-legend" id="trackLegend"></div>
+      </div>
+      <div class="track-stage">
+        <div class="track-board">
+          <svg id="scoreTrackSvg" viewBox="0 0 1000 350" role="img" aria-label="กระดานตำแหน่งคะแนนของผู้เล่น"></svg>
+        </div>
+      </div>
+    </section>
 
     <div class="dashboard-action">
       <button class="add-score-main" id="openScoreBtn" type="button">＋ เพิ่มคะแนน</button>
@@ -298,7 +356,7 @@
   var baseCategories = [
     { id:'city', label:'🏰 เมือง' },
     { id:'road', label:'🛣️ ถนน' },
-    { id:'monastery', label:'⛪ โบสถ์' },
+    { id:'monastery', label:'⛪ โบสถ์ / 🌼 ดอกไม้' },
     { id:'field', label:'🌾 นอนหญ้า' }
   ];
 
@@ -412,8 +470,119 @@
       scoreGrid.appendChild(card);
     });
 
+    renderScoreTrack();
+
     var start = new Date(state.createdAt || Date.now());
     el('gameInfo').textContent = state.players.length+' ผู้เล่น • เริ่ม '+start.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+  }
+
+  function scoreCellPosition(score) {
+    var safe = Math.max(0, Number(score) || 0);
+    var pos = safe % 50;
+    var row = Math.floor(pos / 10);
+    var local = pos % 10;
+    var col = row % 2 === 0 ? local : 9 - local;
+    return {
+      x:78 + col * 94,
+      y:70 + row * 50,
+      lap:Math.floor(safe / 50),
+      pos:pos
+    };
+  }
+
+  function svgEscape(s) {
+    return escapeHtml(s).replace(/\n/g,' ');
+  }
+
+  function renderScoreTrack() {
+    var svg = el('scoreTrackSvg');
+    var legend = el('trackLegend');
+    if (!svg || !legend) return;
+
+    legend.innerHTML = state.players.map(function(p){
+      var safe = Math.max(0,Number(p.score)||0);
+      var lap = Math.floor(safe/50);
+      return '<span class="track-chip" style="--player:'+p.color+'">' +
+        '<span class="track-chip-dot"></span>' +
+        '<span>'+escapeHtml(p.name)+' '+p.score+'</span>' +
+        (lap > 0 ? '<span class="track-chip-lap">+'+(lap*50)+'</span>' : '') +
+      '</span>';
+    }).join('');
+
+    var defs =
+      '<defs>' +
+        '<linearGradient id="grass" x1="0" y1="0" x2="1" y2="1">' +
+          '<stop offset="0%" stop-color="#91b665"/><stop offset="58%" stop-color="#769d55"/><stop offset="100%" stop-color="#5f8446"/>' +
+        '</linearGradient>' +
+        '<linearGradient id="wood" x1="0" y1="0" x2="0" y2="1">' +
+          '<stop offset="0%" stop-color="#a97743"/><stop offset="100%" stop-color="#6f4729"/>' +
+        '</linearGradient>' +
+        '<filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">' +
+          '<feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#2d2419" flood-opacity=".28"/>' +
+        '</filter>' +
+      '</defs>';
+
+    var board =
+      '<rect x="20" y="18" width="960" height="310" rx="30" fill="url(#wood)"/>' +
+      '<rect x="33" y="29" width="934" height="283" rx="23" fill="url(#grass)" stroke="#d8c38d" stroke-width="4"/>' +
+      '<path d="M60 290 C180 220, 210 230, 315 175 S500 90, 645 160 S810 245, 940 90" fill="none" stroke="#d8be7a" stroke-width="18" stroke-linecap="round" opacity=".58"/>' +
+      '<path d="M60 290 C180 220, 210 230, 315 175 S500 90, 645 160 S810 245, 940 90" fill="none" stroke="#a78650" stroke-width="3" stroke-dasharray="7 9" opacity=".5"/>' +
+      '<g opacity=".9">' +
+        '<rect x="455" y="139" width="90" height="55" rx="9" fill="#d9c28b" stroke="#684a32" stroke-width="3"/>' +
+        '<path d="M448 145 L500 105 L552 145 Z" fill="#a65342" stroke="#684a32" stroke-width="3"/>' +
+        '<rect x="492" y="163" width="18" height="31" fill="#684a32"/>' +
+        '<circle cx="500" cy="132" r="8" fill="#f2e5b8"/>' +
+      '</g>';
+
+    var cells = '';
+    for (var i=0;i<50;i++) {
+      var pos = scoreCellPosition(i);
+      var special = i % 10 === 0;
+      cells +=
+        '<g>' +
+          '<rect x="'+(pos.x-38)+'" y="'+(pos.y-19)+'" width="76" height="38" rx="10" ' +
+            'fill="'+(special ? '#f6df9b' : '#f3e8c6')+'" fill-opacity=".95" stroke="'+(special ? '#8c672d' : '#867b5d')+'" stroke-width="'+(special ? '2.6' : '1.5')+'" />' +
+          '<text class="track-cell-number" x="'+pos.x+'" y="'+pos.y+'">'+i+'</text>' +
+        '</g>';
+    }
+
+    var grouped = {};
+    state.players.forEach(function(p){
+      var pos = scoreCellPosition(p.score);
+      var key = String(pos.pos);
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push({player:p,meta:pos});
+    });
+
+    var offsets = [
+      [0,0],[-17,-10],[17,-10],[-17,11],[17,11],[0,-18],[0,18]
+    ];
+    var markers = '';
+    Object.keys(grouped).forEach(function(key){
+      grouped[key].forEach(function(entry,index){
+        var p = entry.player;
+        var m = entry.meta;
+        var off = offsets[index] || [((index%3)-1)*16,(Math.floor(index/3)-1)*12];
+        var x = m.x + off[0];
+        var y = m.y + off[1];
+        var shortName = String(p.name || '').trim().slice(0,4);
+        markers +=
+          '<g class="track-marker" transform="translate('+x+' '+y+')" filter="url(#softShadow)">' +
+            '<circle cx="0" cy="-8" r="7" fill="'+p.color+'" stroke="#fff" stroke-width="2"/>' +
+            '<path d="M-9 2 Q0 -3 9 2 L12 14 L-12 14 Z" fill="'+p.color+'" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>' +
+            '<text class="track-marker-name" x="0" y="27">'+svgEscape(shortName)+'</text>' +
+            (m.lap > 0
+              ? '<g transform="translate(15 -17)"><circle r="10" fill="#2d2924" stroke="#fff" stroke-width="1.5"/><text class="track-lap-badge" x="0" y=".5">'+m.lap+'</text></g>'
+              : '') +
+          '</g>';
+      });
+    });
+
+    var labels =
+      '<text x="55" y="48" font-size="12" font-weight="900" fill="#eef4dc">START</text>' +
+      '<text x="945" y="304" font-size="10" text-anchor="end" fill="#e4efd0">50 ช่อง • วนรอบเมื่อเกิน 49</text>';
+
+    svg.innerHTML = defs + board + cells + markers + labels;
   }
 
   scoreGrid.addEventListener('change',function(e){
