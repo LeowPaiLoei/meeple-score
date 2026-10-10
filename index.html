@@ -64,7 +64,33 @@
     .player-name { border:0; background:transparent; width:100%; min-width:0; padding:2px 0; outline:none; font-size:18px; font-weight:900; color:var(--ink); border-bottom:2px solid transparent; }
     .player-name:focus { border-bottom-color:var(--player); }
     .rank { color:var(--muted); font-size:12px; font-weight:800; white-space:nowrap; }
-    .score { margin:11px 0 0; font-size:clamp(54px,7vw,74px); font-weight:950; line-height:.9; letter-spacing:-.055em; font-variant-numeric:tabular-nums; }
+    .player-body { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:end; gap:15px; margin-top:8px; }
+    .score { margin:0; min-width:82px; font-size:clamp(54px,7vw,74px); font-weight:950; line-height:.9; letter-spacing:-.055em; font-variant-numeric:tabular-nums; }
+    .mini-history { min-width:0; align-self:stretch; display:flex; flex-direction:column; justify-content:flex-end; }
+    .mini-history-title { color:var(--muted); font-size:9px; font-weight:900; margin-bottom:3px; text-transform:uppercase; letter-spacing:.03em; }
+    .mini-history-scroll {
+      max-height:44px;
+      overflow-y:auto;
+      overscroll-behavior:contain;
+      -webkit-overflow-scrolling:touch;
+      scrollbar-width:thin;
+      padding-right:2px;
+    }
+    .mini-history-row {
+      height:22px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:7px;
+      border-top:1px solid rgba(57,45,31,.08);
+      color:#5e5549;
+      font-size:10px;
+      white-space:nowrap;
+    }
+    .mini-history-row:first-child { border-top:0; }
+    .mini-history-label { min-width:0; overflow:hidden; text-overflow:ellipsis; }
+    .mini-history-points { flex:0 0 auto; color:var(--ink); font-weight:950; }
+    .mini-history-empty { height:22px; display:flex; align-items:center; color:#a09789; font-size:10px; }
     .dashboard-action { display:flex; justify-content:center; margin:13px 0 10px; }
     .add-score-main { min-height:58px; padding:0 28px; border:0; border-radius:18px; background:var(--green); color:#fff; font-weight:950; font-size:18px; box-shadow:0 8px 20px rgba(47,85,63,.20); }
     .add-score-main:active { transform:scale(.985); }
@@ -197,13 +223,50 @@
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
     @media (orientation:landscape) and (min-width:900px) {
+      .app {
+        display:grid;
+        grid-template-columns:minmax(0,1.72fr) minmax(360px,.88fr);
+        grid-template-areas:
+          "header header"
+          "players track"
+          "action action"
+          "footer footer";
+        column-gap:12px;
+        row-gap:9px;
+        align-items:start;
+      }
+      header { grid-area:header; margin-bottom:0; }
+      .score-grid { grid-area:players; gap:9px; }
       .score-grid.players-3,.score-grid.players-5,.score-grid.players-6 { grid-template-columns:repeat(3,minmax(0,1fr)); }
       .score-grid.players-2,.score-grid.players-4 { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .track-section {
+        grid-area:track;
+        margin-top:0;
+        min-height:260px;
+        height:100%;
+        padding:8px 9px 8px;
+        display:flex;
+        flex-direction:column;
+      }
+      .track-header { margin-bottom:0; }
+      .track-header p { display:none; }
+      .track-legend { max-width:68%; gap:3px; }
+      .track-chip { min-height:23px; padding:0 6px; font-size:9px; }
+      .track-stage { flex:1; min-height:0; padding:0 2px 2px; display:flex; align-items:center; }
+      .track-board { width:100%; transform:rotateX(5deg) rotateZ(-.25deg); filter:drop-shadow(0 8px 7px rgba(55,43,25,.18)); }
+      .track-board svg { width:100%; height:auto; max-height:300px; }
+      .dashboard-action { grid-area:action; margin:0; }
+      .add-score-main { min-height:50px; font-size:17px; }
+      .footer-bar { grid-area:footer; }
       .summary-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
-      .player-card { min-height:126px; }
-      .score { font-size:58px; }
-      .track-section { padding:9px 11px 10px; }
-      .track-stage { padding:0 22px 5px; }
+      .player-card { min-height:145px; padding:11px 12px 10px 17px; }
+      .player-top { gap:7px; }
+      .player-name { font-size:16px; }
+      .rank { font-size:10px; }
+      .player-body { gap:9px; margin-top:6px; }
+      .score { min-width:68px; font-size:52px; }
+      .mini-history-scroll { max-height:44px; }
+      .mini-history-row { font-size:9px; }
     }
     @media (max-width:720px) {
       .brand p { display:none; }
@@ -446,6 +509,32 @@
     return '🕘 ไม่ระบุ (ข้อมูลเก่า)';
   }
 
+  function playerRecentHistory(playerId) {
+    return state.history.slice().reverse().filter(function(h){
+      if (Array.isArray(h.players)) {
+        return h.players.some(function(x){ return x.id === playerId; });
+      }
+      return h.playerId === playerId;
+    });
+  }
+
+  function renderMiniHistory(playerId) {
+    var entries = playerRecentHistory(playerId);
+    if (!entries.length) {
+      return '<div class="mini-history"><div class="mini-history-title">ล่าสุด</div><div class="mini-history-empty">ยังไม่มีคะแนน</div></div>';
+    }
+    var rows = entries.map(function(h){
+      return '<div class="mini-history-row">' +
+        '<span class="mini-history-label">'+categoryLabel(h.category)+'</span>' +
+        '<span class="mini-history-points">'+signed(Number(h.delta)||0)+'</span>' +
+      '</div>';
+    }).join('');
+    return '<div class="mini-history">' +
+      '<div class="mini-history-title">ล่าสุด • เลื่อนดูได้</div>' +
+      '<div class="mini-history-scroll">'+rows+'</div>' +
+    '</div>';
+  }
+
   function renderDashboard() {
     scoreGrid.className = 'score-grid players-' + state.players.length;
     scoreGrid.innerHTML = '';
@@ -466,7 +555,10 @@
           '</div>' +
           '<span class="rank">อันดับ '+rankMap[p.id]+'</span>' +
         '</div>' +
-        '<div class="score">'+p.score+'</div>';
+        '<div class="player-body">' +
+          '<div class="score">'+p.score+'</div>' +
+          renderMiniHistory(p.id) +
+        '</div>';
       scoreGrid.appendChild(card);
     });
 
