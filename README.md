@@ -14,12 +14,13 @@ Designed to run smoothly on an iPad, Meeple Score replaces the physical scoring 
 - ➕ Quick score buttons: **+1 through +10**; repeated taps accumulate into one pending score before confirmation
 - 🔢 Add any custom score (negative values are still available for corrections)
 - ↩️ Undo the latest score change
-- 🏰 Detailed scoring categories: **City, Road, Church, Farmer, and Goods**
+- 🏰 Detailed scoring categories: **City, Road, Church / Flower, Farmer, and Goods**
 - 🎁 Goods picker with separate **Chicken, Cloth, and Rice** entries
 - 📊 Per-player score breakdown by category and goods type
 - 🕘 Score history with scoring category
 - 💾 Automatic saving with `localStorage`
 - 📱 Compact score-only dashboard for **2–6 players**, with a dedicated multi-player scoring panel
+- 🗺️ Live pseudo-3D score track with moving player markers and lap indicators
 - 🏠 Installable with **Add to Home Screen**
 - 🌐 Works offline after the first successful load
 - 🚫 No account, database, or server required
